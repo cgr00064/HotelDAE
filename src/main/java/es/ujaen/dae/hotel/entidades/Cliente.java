@@ -16,8 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Cliente {
 
-    private int id;
-
     @NotBlank
     @Pattern(regexp = ExprReg.DNI)
     private final String dni;
@@ -43,17 +41,6 @@ public class Cliente {
     private List<Reserva> reservas = new ArrayList<>();
     private int totalReservas = 0;
 
-//    public Cliente(int id, String dni, String nombre, String userName, String contraseña, Direccion direccion, String tlf, String email){
-//        this.id = id;
-//        this.dni = dni;
-//        this.nombre = nombre;
-//        this.userName = userName;
-//        this.contraseña = contraseña;
-//        this.direccion = direccion;
-//        this.tlf = tlf;
-//        this.email = email;
-//        reservas = new ArrayList<>();
-//    }
 
     public List<Reserva> verReservas() {
         return Collections.unmodifiableList(reservas);

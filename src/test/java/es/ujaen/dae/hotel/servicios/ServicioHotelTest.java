@@ -181,7 +181,7 @@ public class ServicioHotelTest {
         Administrador administrador = new Administrador("mhm", "clave3");
         Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
         hotel1.addReserva(reserva);
-        boolean reservaRealizada = servicioHotel.hacerReserva(loginCliente, direccionHotel, fechaInicioBuscar, fechaFinBuscar, 2, 1);
+        boolean reservaRealizada = servicioHotel.hacerReserva(loginCliente, direccionHotel, fechaInicioBuscar, fechaFinBuscar, 2, 1, hotel);
         Assertions.assertThat(reservaRealizada).isTrue();
         List<Reserva> reservas = loginCliente.verReservas();
         Assertions.assertThat(reservas).hasSize(1);

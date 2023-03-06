@@ -29,4 +29,5 @@ public class Reserva {
 
     @PositiveOrZero
     private final int numHabitacionesDobl;
+
 }

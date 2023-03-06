@@ -6,12 +6,14 @@ import es.ujaen.dae.hotel.excepciones.ClienteYaRegistrado;
 import es.ujaen.dae.hotel.excepciones.HotelYaExiste;
 import es.ujaen.dae.hotel.excepciones.ReservaNoDisponible;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -19,7 +21,7 @@ import java.util.*;
 @Slf4j
 @Validated
 public class ServicioHotel {
-    Map<Integer, Cliente> clientes;
+    Map<String, Cliente> clientes;
     Map<Integer, Hotel> hoteles;
     //Mapa de administradores para la comprobacion en altaHotel
     Map<String, Administrador> administradores;
@@ -28,7 +30,7 @@ public class ServicioHotel {
 
     @PostConstruct
     private void init() {
-        clientes = new TreeMap<>();
+        clientes = new TreeMap<String, Cliente>();
         hoteles = new TreeMap<>();
         administradores = new TreeMap<>();
         numClientes = 0;
@@ -44,20 +46,19 @@ public class ServicioHotel {
 
     public Cliente altaCliente(@NotNull @Valid Cliente cliente) throws ClienteNoRegistrado {
         log.info("Cliente con datos: " + cliente + " registrandose");
-        if (clientes.containsKey(cliente.getId())) {
+        if (clientes.containsKey(cliente.getDni())) {
             throw new ClienteYaRegistrado();
         } else {
-            cliente.setId(numClientes++);
-            clientes.put(cliente.getId(), cliente);
+            clientes.put(cliente.getDni(), cliente);
             log.info("Cliente con datos: " + cliente + " registrado");
             return cliente;
         }
     }
 
     public Hotel altaHotel(@NotNull @Valid Hotel hotel, @Valid @NotNull Administrador administrador) throws Exception {
-        for (Map.Entry<String, Administrador> administradores : administradores.entrySet()) {
-            if (administradores.getValue().getUserName().equals(administrador.getUserName())
-                    && administradores.getValue().getContraseña().equals(administrador.getContraseña())) {
+        if (administradores.containsKey(administrador.getUserName())) {
+            Administrador admin = administradores.get(administrador.getUserName());
+            if (admin.getContraseña().equals(administrador.getContraseña())) {
                 log.info("Hotel con datos: " + hotel + " registrandose");
                 if (hoteles.containsKey(hotel.getId())) {
                     throw new HotelYaExiste();
@@ -74,15 +75,11 @@ public class ServicioHotel {
 
     public Optional<Cliente> loginCliente(@NotNull String userName, @NotNull String clave) {
         Optional<Cliente> cliente = Optional.empty();
-        for (Map.Entry<Integer, Cliente> clientes : clientes.entrySet()) {
+        for (Map.Entry<String, Cliente> clientes : clientes.entrySet()) {
             if (clientes.getValue().getUserName().equals(userName) && clientes.getValue().claveValida(clave))
                 cliente = Optional.of(clientes.getValue());
         }
         return cliente;
-//        return Optional
-//                .ofNullable(clientes.get(userName))
-//                .filter((cliente)
-//                        -> cliente.claveValida(clave));
     }
     
     public List<Hotel> buscarHoteles(Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin) {
@@ -104,19 +101,37 @@ public class ServicioHotel {
         }
         return listaHoteles;
     }
-    
-    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numDoble, int numSimple) {
 
-        List<Hotel> listaHoteles = buscarHoteles(direccion, fechaIni, fechaFin);
-        //Suponemos que se queda con el primer hotel que hay en esa direccion
-        if(clientes.containsKey(cliente.getId()))
-        if (listaHoteles.get(0).getNumDobl() >= numDoble && listaHoteles.get(0).getNumSimp() >= numSimple) {
-            Reserva reserva = new Reserva(direccion, fechaIni, fechaFin, numSimple, numDoble);
-            cliente.addReserva(reserva);
-            listaHoteles.get(0).setNumSimp(numSimple);
-            listaHoteles.get(0).setNumDobl(numDoble);
-            return true;
+    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numDoble, int numSimple, Hotel hotel) {
+        if (clientes.containsKey(cliente.getDni())) {
+            if (hotel.getNumDobl() >= numDoble && hotel.getNumSimp() >= numSimple) {
+                Reserva reserva = new Reserva(direccion, fechaIni, fechaFin, numSimple, numDoble);
+                cliente.addReserva(reserva);
+                hotel.setNumSimp(numSimple);
+                hotel.setNumDobl(numDoble);
+                return true;
+            }
         }
         return false;
+    }
+
+    @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
+    public void moverReservasPasadasAHistorico() {
+        for (Hotel hotel : hoteles.values()) {
+            List<Reserva> reservasActuales = hotel.getReservasActuales();
+            List<Reserva> reservasPasadas = hotel.getReservasPasadas();
+
+            // Mover las reservas pasadas a la lista de reservas históricas
+            Iterator<Reserva> iterator = reservasActuales.iterator();
+            while (iterator.hasNext()) {
+                Reserva reserva = iterator.next();
+                if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
+                    iterator.remove();
+                    hotel.setNumSimp(reserva.getNumHabitacionesSimp());
+                    hotel.setNumDobl(reserva.getNumHabitacionesDobl());
+                    reservasPasadas.add(reserva);
+                }
+            }
+        }
     }
 }

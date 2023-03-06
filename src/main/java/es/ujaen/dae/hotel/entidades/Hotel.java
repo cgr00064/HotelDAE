@@ -43,18 +43,17 @@ public class Hotel {
         reservasPasadas = new ArrayList<>();
     }
 
-
-    public List<Reserva> verReservas(LocalDateTime fechaIni, LocalDateTime fechaFin) {
-        List<Reserva> reservas = new ArrayList<>();
-        for (Reserva reservasActuales : reservasActuales) {
-            if (reservasActuales.getFechaInicio() == fechaIni && reservasActuales.getFechaFin() == fechaFin)
-                reservas.add(reservasActuales);
-        }
-        return reservas;
-    }
     public void addReserva(Reserva reserva){
         reserva.setId(totalReservasActuales++);
         reservasActuales.add(reserva);
+    }
+
+    public int getNumSimp() {
+        return numSimp;
+    }
+
+    public int getNumDobl() {
+        return numDobl;
     }
 
     public void setNumDobl(int numDobl) {
@@ -65,13 +64,9 @@ public class Hotel {
         this.numSimp -= numSimp;
     }
 
-
-    //Trabajo Voluntario
-    @Scheduled(cron="0 0 3 * * * ?")
-    public void cambioReservar(){
-        for (Reserva reservasActuale : reservasActuales) {
-            if (reservasActuale.getFechaFin().isBefore(LocalDateTime.now()))
-                reservasPasadas.add(reservasActuale);
-        }
+    public List<Reserva> getReservasHistoricas() {
+        return reservasPasadas;
     }
+
+
 }
