@@ -68,5 +68,26 @@ public class Hotel {
         return reservasPasadas;
     }
 
+    /*
+    numHabitacionesSimp() calcula el número de habitaciones simples disponibles restando el
+    número total de habitaciones simples del hotel al número de habitaciones simples ya
+    reservadas en las reservas actuales del hotel.
+     */
+    public int numHabitacionesSimp() {
+        int numReservasSimples = reservasActuales.stream()
+                .mapToInt(Reserva::getNumHabitacionesSimp)
+                .sum();
+        return numSimp - numReservasSimples;
+    }
+
+    /*
+    Similar a numHabitacionesSimp()
+     */
+    public int numDoblDisponibles() {
+        int numReservasDobles = reservasActuales.stream()
+                .mapToInt(Reserva::getNumHabitacionesDobl)
+                .sum();
+        return numDobl - numReservasDobles;
+    }
 
 }

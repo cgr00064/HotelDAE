@@ -81,21 +81,22 @@ public class ServicioHotel {
         }
         return cliente;
     }
-    
+
+    /*
+    Este método itera sobre todos los hoteles y comprueba si la dirección coincide con la dirección dada y
+    si hay habitaciones disponibles en el hotel. Luego, verifica si hay alguna reserva en el hotel que se
+    solape con las fechas dadas. Si no hay solapamiento, agrega el hotel a la lista de hoteles disponibles.
+     */
     public List<Hotel> buscarHoteles(Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin) {
         List<Hotel> listaHoteles = new ArrayList<>();
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
-            for (int i = 0; i < hoteles.getValue().getReservasActuales().size(); i++) {
-                if (hoteles.getValue().getDireccion() == direccion) {
-                    if (fechaIni.isBefore(hoteles.getValue().getReservasActuales().get(i).getFechaInicio())
-                            && fechaFin.isBefore(hoteles.getValue().getReservasActuales().get(i).getFechaInicio())
-                            || fechaIni.isAfter(hoteles.getValue().getReservasActuales().get(i).getFechaFin())) {
-                        listaHoteles.add(hoteles.getValue());
-                    } else {
-                        throw new ReservaNoDisponible();
-                    }
-                } else {
-                    throw new ReservaNoDisponible();
+            Hotel hotel = hoteles.getValue();
+            if (hotel.getDireccion().equals(direccion) && hotel.numHabitacionesSimp() > 0 && hotel.numDoblDisponibles() > 0) {
+                boolean reservaDisponible = hotel.getReservasActuales()
+                        .stream()
+                        .noneMatch(r -> r.solapa(new Reserva(null, direccion, fechaIni, fechaFin, 0, 0)));
+                if (reservaDisponible) {
+                    listaHoteles.add(hotel);
                 }
             }
         }

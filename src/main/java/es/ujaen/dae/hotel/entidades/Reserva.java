@@ -16,7 +16,7 @@ public class Reserva {
     int id;
     @NotNull
     private final Cliente cliente; // referencia al cliente que hace la reserva
-    
+
     @NotNull
     private final Direccion direccion;
 
@@ -31,5 +31,14 @@ public class Reserva {
 
     @PositiveOrZero
     private final int numHabitacionesDobl;
+
+    /*
+     verifica si la reserva actual se solapa con otra reserva recibida como parámetro.
+     Si se solapa, retorna true, de lo contrario, retorna false.
+     */
+    public boolean solapa(Reserva otraReserva) {
+        return (fechaInicio.isBefore(otraReserva.getFechaFin())
+                && otraReserva.getFechaInicio().isBefore(fechaFin));
+    }
 
 }
