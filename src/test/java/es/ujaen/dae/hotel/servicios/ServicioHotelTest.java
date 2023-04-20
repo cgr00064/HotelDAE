@@ -111,6 +111,14 @@ public class ServicioHotelTest {
                 20,
                 30
         );
+        Cliente cliente = new Cliente(
+                "11111111A",
+                "Juan",
+                "juanito",
+                "contraseña",
+                direccion,
+                "123456789",
+                "juanito@gmail.com");
 
         LocalDateTime fechaInicioReserva = LocalDateTime.of(2022, 10, 10, 10, 10, 10, 10);
         LocalDateTime fechaFinReserva = LocalDateTime.of(2022, 11, 11, 11, 11, 11, 11);
@@ -118,6 +126,7 @@ public class ServicioHotelTest {
         LocalDateTime fechaFinBuscar = LocalDateTime.of(2022, 10, 9, 11, 11, 11, 11);
 
         Reserva reserva = new Reserva(
+                cliente,
                 direccion,
                 fechaInicioReserva,
                 fechaFinReserva,
@@ -169,6 +178,7 @@ public class ServicioHotelTest {
         LocalDateTime fechaInicioBuscar = LocalDateTime.of(2022, 10, 1, 10, 10, 10, 10);
         LocalDateTime fechaFinBuscar = LocalDateTime.of(2022, 10, 9, 11, 11, 11, 11);
         Reserva reserva = new Reserva(
+                cliente,
                 direccionHotel,
                 fechaInicioReserva,
                 fechaFinReserva,

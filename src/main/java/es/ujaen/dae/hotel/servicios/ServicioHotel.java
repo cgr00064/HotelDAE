@@ -105,7 +105,7 @@ public class ServicioHotel {
     boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numDoble, int numSimple, Hotel hotel) {
         if (clientes.containsKey(cliente.getDni())) {
             if (hotel.getNumDobl() >= numDoble && hotel.getNumSimp() >= numSimple) {
-                Reserva reserva = new Reserva(direccion, fechaIni, fechaFin, numSimple, numDoble);
+                Reserva reserva = new Reserva(cliente, direccion, fechaIni, fechaFin, numSimple, numDoble);
                 cliente.addReserva(reserva);
                 hotel.setNumSimp(numSimple);
                 hotel.setNumDobl(numDoble);

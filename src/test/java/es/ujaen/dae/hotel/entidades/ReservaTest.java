@@ -21,14 +21,28 @@ public class ReservaTest {
                 "Jaen",
                 "SanJuan",
                 19);
+
+        Cliente cliente = new Cliente(
+                "11111111A",
+                "Juan",
+                "juanito",
+                "contraseña",
+                direccion,
+                "123456789",
+                "juanito@gmail.com");
+
         LocalDateTime fechaInicio = LocalDateTime.of(2022, 10, 10, 10, 10, 10, 10);
         LocalDateTime fechaFin = LocalDateTime.of(2022, 11, 11, 11, 11, 11, 11);
+
         Reserva reserva = new Reserva(
+                cliente,
                 direccion,
                 fechaInicio,
                 fechaFin,
                 1,
                 2);
+
+        cliente.addReserva(reserva);
 
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<Reserva>> violations = validator.validate(reserva);

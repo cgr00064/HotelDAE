@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 public class Reserva {
 
     int id;
-
+    @NotNull
+    private final Cliente cliente; // referencia al cliente que hace la reserva
+    
     @NotNull
     private final Direccion direccion;
 
