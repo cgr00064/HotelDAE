@@ -92,6 +92,10 @@ public class ServicioHotel {
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
             Hotel hotel = hoteles.getValue();
             if (hotel.getDireccion().equals(direccion) && hotel.numHabitacionesSimp() > 0 && hotel.numDoblDisponibles() > 0) {
+            /*
+            se realiza una búsqueda en las reservas históricas del hotel para verificar si hay alguna reserva existente
+            que se superponga con las fechas de la reserva nueva.
+            */
                 boolean reservaDisponible = hotel.getReservasActuales()
                         .stream()
                         .noneMatch(r -> r.solapa(new Reserva(null, direccion, fechaIni, fechaFin, 0, 0)));
@@ -105,11 +109,15 @@ public class ServicioHotel {
 
     boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numDoble, int numSimple, Hotel hotel) {
         if (clientes.containsKey(cliente.getDni())) {
-            if (hotel.getNumDobl() >= numDoble && hotel.getNumSimp() >= numSimple) {
+            if (hotel.numHabitacionesSimp() >= numSimple && hotel.numDoblDisponibles() >= numDoble) {
+                for (Reserva reserva : hotel.getReservasHistoricas()) {
+                    if (reserva.solapa(new Reserva(cliente, direccion, fechaIni, fechaFin, numSimple, numDoble))) {
+                        return false; // si la reserva se superpone con alguna existente, no se puede hacer
+                    }
+                }
                 Reserva reserva = new Reserva(cliente, direccion, fechaIni, fechaFin, numSimple, numDoble);
                 cliente.addReserva(reserva);
-                hotel.setNumSimp(numSimple);
-                hotel.setNumDobl(numDoble);
+                hotel.addReserva(reserva);
                 return true;
             }
         }

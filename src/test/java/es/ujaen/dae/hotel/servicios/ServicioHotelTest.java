@@ -140,9 +140,11 @@ public class ServicioHotelTest {
         Assertions.assertThat(listaHoteles).hasSize(1);
     }
 
+
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
     public void testHacerReserva() throws Exception {
+        // Crear hotel con habitaciones disponibles
         Direccion direccionHotel = new Direccion(
                 "España",
                 "Jaen",
@@ -152,48 +154,43 @@ public class ServicioHotelTest {
                 2,
                 "hotel",
                 direccionHotel,
-                20,
-                30
+                2, // 2 habitaciones dobles disponibles
+                2 // 2 habitaciones simples disponibles
         );
 
-        String clave = "manuel82";
+        // Crear cliente y agregarlo al servicio
         Direccion direccionCliente = new Direccion(
                 "España",
                 "Malaga",
                 "SanJuan",
                 19);
-
         Cliente cliente = new Cliente(
                 "12345678Q",
                 "Manuel Jesus",
                 "mjmp0027",
-                clave,
+                "clave",
                 direccionCliente,
                 "657550655",
                 "mjmp0027@ujaen.es"
         );
+        servicioHotel.altaCliente(cliente);
 
+        // Hacer reserva
         LocalDateTime fechaInicioReserva = LocalDateTime.of(2022, 10, 10, 10, 10, 10, 10);
         LocalDateTime fechaFinReserva = LocalDateTime.of(2022, 11, 11, 11, 11, 11, 11);
-        LocalDateTime fechaInicioBuscar = LocalDateTime.of(2022, 10, 1, 10, 10, 10, 10);
-        LocalDateTime fechaFinBuscar = LocalDateTime.of(2022, 10, 9, 11, 11, 11, 11);
-        Reserva reserva = new Reserva(
-                cliente,
-                direccionHotel,
-                fechaInicioReserva,
-                fechaFinReserva,
-                1,
-                2);
+        boolean reservaRealizada = servicioHotel.hacerReserva(cliente, direccionHotel, fechaInicioReserva, fechaFinReserva, 1, 1, hotel);
 
-        Cliente altaCliente = servicioHotel.altaCliente(cliente);
-        Cliente loginCliente = servicioHotel.loginCliente(altaCliente.getUserName(), "manuel82")
-                .orElseThrow(() -> new Exception("Cliente vacio"));
-        Administrador administrador = new Administrador("mhm", "clave3");
-        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
-        hotel1.addReserva(reserva);
-        boolean reservaRealizada = servicioHotel.hacerReserva(loginCliente, direccionHotel, fechaInicioBuscar, fechaFinBuscar, 2, 1, hotel);
+        // Verificar que la reserva se haya realizado correctamente
         Assertions.assertThat(reservaRealizada).isTrue();
-        List<Reserva> reservas = loginCliente.verReservas();
+        List<Reserva> reservas = cliente.verReservas();
         Assertions.assertThat(reservas).hasSize(1);
+        Reserva reserva = reservas.get(0);
+        Assertions.assertThat(reserva.getCliente()).isEqualTo(cliente);
+        Assertions.assertThat(reserva.getDireccion()).isEqualTo(direccionHotel);
+        Assertions.assertThat(reserva.getFechaInicio()).isEqualTo(fechaInicioReserva);
+        Assertions.assertThat(reserva.getFechaFin()).isEqualTo(fechaFinReserva);
+        Assertions.assertThat(reserva.getNumHabitacionesDobl()).isEqualTo(1);
+        Assertions.assertThat(reserva.getNumHabitacionesSimp()).isEqualTo(1);
     }
+
 }
