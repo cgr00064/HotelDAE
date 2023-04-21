@@ -136,8 +136,11 @@ public class ServicioHotelTest {
         Administrador administrador = new Administrador("cgr", "clave2");
         Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
         hotel1.addReserva(reserva);
+
         List<Hotel> listaHoteles = servicioHotel.buscarHoteles(direccion, fechaInicioBuscar, fechaFinBuscar);
+
         Assertions.assertThat(listaHoteles).hasSize(1);
+        Assertions.assertThat(listaHoteles.get(0)).isEqualTo(hotel1);
     }
 
 
