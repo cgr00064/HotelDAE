@@ -1,13 +1,13 @@
 package es.ujaen.dae.hotel.entidades;
 
 import lombok.Data;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -88,6 +88,35 @@ public class Hotel {
                 .mapToInt(Reserva::getNumHabitacionesDobl)
                 .sum();
         return numDobl - numReservasDobles;
+    }
+
+    /*public void moverReservasPasadasAHistorico() {
+        Iterator<Reserva> iterator = reservasActuales.iterator();
+        while (iterator.hasNext()) {
+            Reserva reserva = iterator.next();
+            if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
+                iterator.remove();
+                this.numSimp += reserva.getNumHabitacionesSimp();
+                this.numDobl += reserva.getNumHabitacionesDobl();
+                this.reservasPasadas.add(reserva);
+            }
+        }
+    }*/
+    public void moverReservasPasadasAHistorico() {
+        List<Reserva> reservasActuales = this.getReservasActuales();
+        List<Reserva> reservasPasadas = this.getReservasPasadas();
+
+        // Mover las reservas pasadas a la lista de reservas históricas
+        Iterator<Reserva> iterator = reservasActuales.iterator();
+        while (iterator.hasNext()) {
+            Reserva reserva = iterator.next();
+            if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
+                iterator.remove();
+                this.setNumSimp(reserva.getNumHabitacionesSimp());
+                this.setNumDobl(reserva.getNumHabitacionesDobl());
+                reservasPasadas.add(reserva);
+            }
+        }
     }
 
 }

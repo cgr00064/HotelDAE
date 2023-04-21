@@ -4,7 +4,6 @@ import es.ujaen.dae.hotel.entidades.*;
 import es.ujaen.dae.hotel.excepciones.ClienteNoRegistrado;
 import es.ujaen.dae.hotel.excepciones.ClienteYaRegistrado;
 import es.ujaen.dae.hotel.excepciones.HotelYaExiste;
-import es.ujaen.dae.hotel.excepciones.ReservaNoDisponible;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -127,20 +125,7 @@ public class ServicioHotel {
     @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
     public void moverReservasPasadasAHistorico() {
         for (Hotel hotel : hoteles.values()) {
-            List<Reserva> reservasActuales = hotel.getReservasActuales();
-            List<Reserva> reservasPasadas = hotel.getReservasPasadas();
-
-            // Mover las reservas pasadas a la lista de reservas históricas
-            Iterator<Reserva> iterator = reservasActuales.iterator();
-            while (iterator.hasNext()) {
-                Reserva reserva = iterator.next();
-                if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
-                    iterator.remove();
-                    hotel.setNumSimp(reserva.getNumHabitacionesSimp());
-                    hotel.setNumDobl(reserva.getNumHabitacionesDobl());
-                    reservasPasadas.add(reserva);
-                }
-            }
+            hotel.moverReservasPasadasAHistorico();
         }
     }
 }
