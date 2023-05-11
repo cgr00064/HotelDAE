@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -90,18 +91,6 @@ public class Hotel {
         return numDobl - numReservasDobles;
     }
 
-    /*public void moverReservasPasadasAHistorico() {
-        Iterator<Reserva> iterator = reservasActuales.iterator();
-        while (iterator.hasNext()) {
-            Reserva reserva = iterator.next();
-            if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
-                iterator.remove();
-                this.numSimp += reserva.getNumHabitacionesSimp();
-                this.numDobl += reserva.getNumHabitacionesDobl();
-                this.reservasPasadas.add(reserva);
-            }
-        }
-    }*/
     public void moverReservasPasadasAHistorico() {
         List<Reserva> reservasActuales = this.getReservasActuales();
         List<Reserva> reservasPasadas = this.getReservasPasadas();
@@ -119,4 +108,43 @@ public class Hotel {
         }
     }
 
+    private int numHabitacionesOcupadasSimples(LocalDate fecha) {
+        int numReservasSimples = reservasActuales.stream()
+                .filter(reserva -> reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay(), 0, 0)))
+                .mapToInt(Reserva::getNumHabitacionesSimp)
+                .sum();
+
+        return numReservasSimples;
+    }
+
+    private int numHabitacionesOcupadasDobles(LocalDate fecha){
+        int numReservasDobles = reservasActuales.stream()
+                .filter(reserva -> reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay(), 0, 0)))
+                .mapToInt(Reserva::getNumHabitacionesDobl)
+                .sum();
+        return numReservasDobles;
+    }
+
+    // función pública que verifica si hay disponibilidad en un intervalo de fechas y con un número de habitaciones solicitadas
+    public boolean hayDisponibilidad(LocalDateTime fechaIni, LocalDateTime fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
+        LocalDate fecha = fechaIni.toLocalDate();
+        while (!fecha.isAfter(fechaFin.toLocalDate())) {
+            int numHabitacionesOcupadasSimples = numHabitacionesOcupadasSimples(fecha);
+            int numHabitacionesSimpDisponibles = numSimp - numHabitacionesOcupadasSimples;
+
+            int numHabitacionesOcupadasDobles = numHabitacionesOcupadasDobles(fecha);
+            int numHabitacionesDoblDisponibles = numDobl - numHabitacionesOcupadasDobles;
+
+            if (numHabitacionesSimpDisponibles < numHabitacionesSimp || numHabitacionesDoblDisponibles < numHabitacionesDobl) {
+                return false;
+            }
+
+            fecha = fecha.plusDays(1);
+        }
+
+        return true;
+    }
 }
+
+
+
