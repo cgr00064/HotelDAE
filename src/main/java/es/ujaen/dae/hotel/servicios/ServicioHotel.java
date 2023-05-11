@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -105,25 +106,24 @@ public class ServicioHotel {
     }
     */
 
-    public List<Hotel> buscarHoteles(Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
+    public List<Hotel> buscarHoteles(Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
         List<Hotel> listaHoteles = new ArrayList<>();
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
             Hotel hotel = hoteles.getValue();
-            if (hotel.getDireccion().equals(direccion) && hotel.numHabitacionesSimp() > 0 && hotel.numDoblDisponibles() > 0) {
-                if (hotel.hayDisponibilidad(fechaIni, fechaFin, numHabitacionesSimp, numHabitacionesDobl)) {
-                    listaHoteles.add(hotel);
-                }
+            if (hotel.getDireccion().equals(direccion) && hotel.hayDisponibilidad(fechaIni, fechaFin, numHabitacionesSimp, numHabitacionesDobl)) {
+                listaHoteles.add(hotel);
             }
         }
         return listaHoteles;
     }
 
-    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin, int numDoble, int numSimple, Hotel hotel) {
+
+    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple, Hotel hotel) {
         if (!clientes.containsKey(cliente.getDni())) {
             return false; // el cliente no está registrado
         }
         if (hotel.hayDisponibilidad(fechaIni, fechaFin, numSimple, numDoble)) {
-            Reserva reserva = new Reserva(cliente, direccion, fechaIni, fechaFin, numSimple, numDoble);
+            Reserva reserva = new Reserva(cliente, direccion, fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
             cliente.addReserva(reserva);
             hotel.addReserva(reserva);
             return true; // la reserva se hizo correctamente

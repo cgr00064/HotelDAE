@@ -108,42 +108,36 @@ public class Hotel {
         }
     }
 
-    private int numHabitacionesOcupadasSimples(LocalDate fecha) {
-        int numReservasSimples = reservasActuales.stream()
-                .filter(reserva -> reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay(), 0, 0)))
-                .mapToInt(Reserva::getNumHabitacionesSimp)
-                .sum();
+    public record NumHabitaciones(int dobles, int simples) { }
 
-        return numReservasSimples;
-    }
-
-    private int numHabitacionesOcupadasDobles(LocalDate fecha){
-        int numReservasDobles = reservasActuales.stream()
-                .filter(reserva -> reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay(), 0, 0)))
-                .mapToInt(Reserva::getNumHabitacionesDobl)
-                .sum();
-        return numReservasDobles;
-    }
-
-    // función pública que verifica si hay disponibilidad en un intervalo de fechas y con un número de habitaciones solicitadas
-    public boolean hayDisponibilidad(LocalDateTime fechaIni, LocalDateTime fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
-        LocalDate fecha = fechaIni.toLocalDate();
-        while (!fecha.isAfter(fechaFin.toLocalDate())) {
-            int numHabitacionesOcupadasSimples = numHabitacionesOcupadasSimples(fecha);
-            int numHabitacionesSimpDisponibles = numSimp - numHabitacionesOcupadasSimples;
-
-            int numHabitacionesOcupadasDobles = numHabitacionesOcupadasDobles(fecha);
-            int numHabitacionesDoblDisponibles = numDobl - numHabitacionesOcupadasDobles;
-
-            if (numHabitacionesSimpDisponibles < numHabitacionesSimp || numHabitacionesDoblDisponibles < numHabitacionesDobl) {
+    public boolean hayDisponibilidad(LocalDate fechaInicio, LocalDate fechaFin, int numHabitacionesDobles, int numHabitacionesSimples) {
+        for (LocalDate fecha = fechaInicio; fecha.compareTo(fechaFin) <= 0; fecha = fecha.plusDays(1)) {
+            NumHabitaciones numHabitaciones = getNumHabitacionesOcupadas(fecha);
+            if (numHabitacionesDobles > numHabitaciones.dobles() || numHabitacionesSimples > numHabitaciones.simples()) {
                 return false;
             }
-
-            fecha = fecha.plusDays(1);
+            for (Reserva reserva : reservasActuales) {
+                if (reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.atStartOfDay().plusDays(1), numHabitacionesDobles, numHabitacionesSimples))) {
+                    return false;
+                }
+            }
         }
-
         return true;
     }
+
+    private NumHabitaciones getNumHabitacionesOcupadas(LocalDate fecha) {
+        int numDoblesOcupadas = 0;
+        int numSimplesOcupadas = 0;
+        for (Reserva reserva : reservasActuales) {
+            if (reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.atStartOfDay(), 0, 0))) {
+                numDoblesOcupadas += reserva.getNumHabitacionesDobl();
+                numSimplesOcupadas += reserva.getNumHabitacionesSimp();
+            }
+        }
+        return new NumHabitaciones(numDoblesOcupadas, numSimplesOcupadas);
+    }
+
+
 }
 
 

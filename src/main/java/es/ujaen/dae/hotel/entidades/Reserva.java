@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -40,5 +41,9 @@ public class Reserva {
         return (fechaInicio.isBefore(otraReserva.getFechaFin())
                 && otraReserva.getFechaInicio().isBefore(fechaFin));
     }
+
+
+
+
 
 }

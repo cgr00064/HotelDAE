@@ -9,8 +9,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 
 import javax.validation.ConstraintViolationException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @SpringBootTest(classes = es.ujaen.dae.hotel.HotelDaeApp.class)
@@ -60,8 +64,8 @@ public class ServicioHotelTest {
                 2,
                 "hotel",
                 direccion,
-                20,
-                30
+                2,
+                2
         );
         
         Administrador administrador = new Administrador("mjmp", "clave1");
@@ -98,7 +102,7 @@ public class ServicioHotelTest {
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testBuscarHoteles() throws Exception {
+    public void testNoHayDisponibilidad() throws Exception {
         Direccion direccion = new Direccion(
                 "España",
                 "Jaen",
@@ -108,10 +112,10 @@ public class ServicioHotelTest {
                 2,
                 "hotel",
                 direccion,
-                20,
-                30
+                2,
+                2
         );
-        Cliente cliente = new Cliente(
+        Cliente cliente1 = new Cliente(
                 "11111111A",
                 "Juan",
                 "juanito",
@@ -120,27 +124,45 @@ public class ServicioHotelTest {
                 "123456789",
                 "juanito@gmail.com");
 
-        LocalDateTime fechaInicioReserva = LocalDateTime.of(2022, 10, 10, 10, 10, 10, 10);
-        LocalDateTime fechaFinReserva = LocalDateTime.of(2022, 11, 11, 11, 11, 11, 11);
-        LocalDateTime fechaInicioBuscar = LocalDateTime.of(2022, 10, 1, 10, 10, 10, 10);
-        LocalDateTime fechaFinBuscar = LocalDateTime.of(2022, 10, 9, 11, 11, 11, 11);
-
-        Reserva reserva = new Reserva(
-                cliente,
+        Cliente cliente2 = new Cliente(
+                "11111111A",
+                "Carlos",
+                "carlosgr",
+                "1234",
                 direccion,
-                fechaInicioReserva,
-                fechaFinReserva,
+                "605092233",
+                "cgr00064@gmail.com");
+
+        LocalDateTime fechaInicioReserva1 = LocalDateTime.of(2023, 05, 18, 00, 00, 00, 00);
+        LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
+        Reserva reserva1 = new Reserva(
+                cliente1,
+                direccion,
+                fechaInicioReserva1,
+                fechaFinReserva1,
                 1,
-                2);
+                1);
+        hotel.addReserva(reserva1);
 
-        Administrador administrador = new Administrador("cgr", "clave2");
-        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
-        hotel1.addReserva(reserva);
+        LocalDateTime fechaInicioReserva2 = LocalDateTime.of(2023, 05, 20, 00, 00, 00, 00);
+        LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
+        Reserva reserva2 = new Reserva(
+                cliente2,
+                direccion,
+                fechaInicioReserva2,
+                fechaFinReserva2,
+                0,1
+        );
+        hotel.addReserva(reserva2);
 
-        List<Hotel> listaHoteles = servicioHotel.buscarHoteles(direccion, fechaInicioBuscar, fechaFinBuscar);
-
-        Assertions.assertThat(listaHoteles).hasSize(1);
-        Assertions.assertThat(listaHoteles.get(0)).isEqualTo(hotel1);
+        List<Hotel> hotelesDisponibles = servicioHotel.buscarHoteles(
+                direccion,
+                LocalDate.of(2023, 06, 26),
+                LocalDate.of(2023, 06, 29),
+                2,
+                1
+        );
+        Assertions.assertThat(hotelesDisponibles).isEmpty();
     }
 
 
@@ -179,8 +201,8 @@ public class ServicioHotelTest {
         servicioHotel.altaCliente(cliente);
 
         // Hacer reserva
-        LocalDateTime fechaInicioReserva = LocalDateTime.of(2022, 10, 10, 10, 10, 10, 10);
-        LocalDateTime fechaFinReserva = LocalDateTime.of(2022, 11, 11, 11, 11, 11, 11);
+        LocalDate fechaInicioReserva = LocalDate.of(2022, 10, 10);
+        LocalDate fechaFinReserva = LocalDate.of(2022, 11, 11);
         boolean reservaRealizada = servicioHotel.hacerReserva(cliente, direccionHotel, fechaInicioReserva, fechaFinReserva, 1, 1, hotel);
 
         // Verificar que la reserva se haya realizado correctamente
