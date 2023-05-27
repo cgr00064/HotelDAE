@@ -81,48 +81,25 @@ public class ServicioHotel {
         return cliente;
     }
 
-    /*
-    Este método itera sobre todos los hoteles y comprueba si la dirección coincide con la dirección dada y
-    si hay habitaciones disponibles en el hotel. Luego, verifica si hay alguna reserva en el hotel que se
-    solape con las fechas dadas. Si no hay solapamiento, agrega el hotel a la lista de hoteles disponibles.
-
-    public List<Hotel> buscarHoteles(Direccion direccion, LocalDateTime fechaIni, LocalDateTime fechaFin) {
-        List<Hotel> listaHoteles = new ArrayList<>();
-        for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
-            Hotel hotel = hoteles.getValue();
-            if (hotel.getDireccion().equals(direccion) && hotel.numHabitacionesSimp() > 0 && hotel.numDoblDisponibles() > 0) {
-            /*
-            se realiza una búsqueda en las reservas históricas del hotel para verificar si hay alguna reserva existente
-            que se superponga con las fechas de la reserva nueva.
-                boolean reservaDisponible = hotel.getReservasActuales()
-                        .stream()
-                        .noneMatch(r -> r.solapa(new Reserva(null, direccion, fechaIni, fechaFin, 0, 0)));
-                if (reservaDisponible) {
-                    listaHoteles.add(hotel);
-                }
-            }
-        }
-        return listaHoteles;
-    }
-    */
-
     public List<Hotel> buscarHoteles(Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
+        System.out.println("----------------!!!!buscarHoteles!!!!-------------------------");
+        System.out.println("Hoteles: "+ hoteles.size());
         List<Hotel> listaHoteles = new ArrayList<>();
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
+
             Hotel hotel = hoteles.getValue();
-            if (hotel.getDireccion().equals(direccion) && hotel.hayDisponibilidad(fechaIni, fechaFin, numHabitacionesSimp, numHabitacionesDobl)) {
+            if (hotel.getDireccion().equals(direccion) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
                 listaHoteles.add(hotel);
             }
         }
         return listaHoteles;
     }
 
-
     boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple, Hotel hotel) {
         if (!clientes.containsKey(cliente.getDni())) {
             return false; // el cliente no está registrado
         }
-        if (hotel.hayDisponibilidad(fechaIni, fechaFin, numSimple, numDoble)) {
+        if (hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
             Reserva reserva = new Reserva(cliente, direccion, fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
             cliente.addReserva(reserva);
             hotel.addReserva(reserva);

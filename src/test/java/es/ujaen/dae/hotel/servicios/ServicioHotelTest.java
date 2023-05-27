@@ -13,8 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(classes = es.ujaen.dae.hotel.HotelDaeApp.class)
@@ -102,7 +101,7 @@ public class ServicioHotelTest {
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testNoHayDisponibilidad() throws Exception {
+    public void testBusarHoteles() throws Exception {
         Direccion direccion = new Direccion(
                 "España",
                 "Jaen",
@@ -115,6 +114,9 @@ public class ServicioHotelTest {
                 2,
                 2
         );
+        Administrador administrador = new Administrador("mjmp", "clave1");
+        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
+
         Cliente cliente1 = new Cliente(
                 "11111111A",
                 "Juan",
@@ -157,14 +159,14 @@ public class ServicioHotelTest {
 
         List<Hotel> hotelesDisponibles = servicioHotel.buscarHoteles(
                 direccion,
-                LocalDate.of(2023, 06, 26),
-                LocalDate.of(2023, 06, 29),
+                LocalDate.of(2023, 5, 20),
+                LocalDate.of(2023, 5, 21),
                 2,
                 1
         );
         Assertions.assertThat(hotelesDisponibles).isEmpty();
-    }
 
+    }
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)

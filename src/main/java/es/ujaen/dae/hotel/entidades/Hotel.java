@@ -69,28 +69,6 @@ public class Hotel {
         return reservasPasadas;
     }
 
-    /*
-    numHabitacionesSimp() calcula el número de habitaciones simples disponibles restando el
-    número total de habitaciones simples del hotel al número de habitaciones simples ya
-    reservadas en las reservas actuales del hotel.
-     */
-    public int numHabitacionesSimp() {
-        int numReservasSimples = reservasActuales.stream()
-                .mapToInt(Reserva::getNumHabitacionesSimp)
-                .sum();
-        return numSimp - numReservasSimples;
-    }
-
-    /*
-    Similar a numHabitacionesSimp()
-     */
-    public int numDoblDisponibles() {
-        int numReservasDobles = reservasActuales.stream()
-                .mapToInt(Reserva::getNumHabitacionesDobl)
-                .sum();
-        return numDobl - numReservasDobles;
-    }
-
     public void moverReservasPasadasAHistorico() {
         List<Reserva> reservasActuales = this.getReservasActuales();
         List<Reserva> reservasPasadas = this.getReservasPasadas();
@@ -110,34 +88,47 @@ public class Hotel {
 
     public record NumHabitaciones(int dobles, int simples) { }
 
-    public boolean hayDisponibilidad(LocalDate fechaInicio, LocalDate fechaFin, int numHabitacionesDobles, int numHabitacionesSimples) {
-        for (LocalDate fecha = fechaInicio; fecha.compareTo(fechaFin) <= 0; fecha = fecha.plusDays(1)) {
-            NumHabitaciones numHabitaciones = getNumHabitacionesOcupadas(fecha);
-            if (numHabitacionesDobles > numHabitaciones.dobles() || numHabitacionesSimples > numHabitaciones.simples()) {
+    private NumHabitaciones habitacionesOcupadasEnDia(LocalDateTime dia) {
+
+        System.out.println("Reservas actuales: "+ reservasActuales.size());
+
+        //if(reservasActuales.isEmpty())
+        //    return new NumHabitaciones(0, 0);
+
+        int doblesOcupadas = 0;
+        int simplesOcupadas = 0;
+
+        for (Reserva reserva : reservasActuales) {
+            if(reserva.solapa(dia)) {
+                doblesOcupadas += reserva.getNumHabitacionesDobl();
+                simplesOcupadas += reserva.getNumHabitacionesSimp();
+            }
+        }
+        System.out.println("dobles: "+doblesOcupadas+" simples: "+simplesOcupadas);
+        return new NumHabitaciones(doblesOcupadas, simplesOcupadas);
+    }
+    public boolean hayDisponibilidad(
+            LocalDateTime fechaInicio, LocalDateTime fechaFin,
+            int numHabitacionesDobl, int numHabitacionesSimp) {
+
+        LocalDateTime dia = fechaInicio;
+
+        while (!dia.isAfter(fechaFin)) {
+
+            NumHabitaciones habitacionesOcupadas = habitacionesOcupadasEnDia(dia);
+
+            int doblesDisponibles = getNumDobl() - habitacionesOcupadas.dobles();
+            int simplesDisponibles = getNumSimp() - habitacionesOcupadas.simples();
+
+            if (doblesDisponibles < numHabitacionesDobl || simplesDisponibles < numHabitacionesSimp) {
                 return false;
             }
-            for (Reserva reserva : reservasActuales) {
-                if (reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.atStartOfDay().plusDays(1), numHabitacionesDobles, numHabitacionesSimples))) {
-                    return false;
-                }
-            }
+
+            dia = dia.plusDays(1);
         }
+
         return true;
     }
-
-    private NumHabitaciones getNumHabitacionesOcupadas(LocalDate fecha) {
-        int numDoblesOcupadas = 0;
-        int numSimplesOcupadas = 0;
-        for (Reserva reserva : reservasActuales) {
-            if (reserva.solapa(new Reserva(null, null, fecha.atStartOfDay(), fecha.atStartOfDay(), 0, 0))) {
-                numDoblesOcupadas += reserva.getNumHabitacionesDobl();
-                numSimplesOcupadas += reserva.getNumHabitacionesSimp();
-            }
-        }
-        return new NumHabitaciones(numDoblesOcupadas, numSimplesOcupadas);
-    }
-
-
 }
 
 
