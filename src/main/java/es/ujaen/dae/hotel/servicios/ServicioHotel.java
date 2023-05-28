@@ -81,12 +81,11 @@ public class ServicioHotel {
     }
 
     public List<Hotel> buscarHoteles(String ciudad, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
-        //System.out.println("----------------!!!!buscarHoteles!!!!-------------------------");
-        //System.out.println("Hoteles: "+ hoteles.size());
         List<Hotel> listaHoteles = new ArrayList<>();
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
 
             Hotel hotel = hoteles.getValue();
+            // A la hora de buscar lo que mas sentido tiene es por ciudad
             if (hotel.getDireccion().getCiudad().equals(ciudad) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
                 listaHoteles.add(hotel);
             }
@@ -94,15 +93,20 @@ public class ServicioHotel {
         return listaHoteles;
     }
 
-    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple, Hotel hotel) {
+    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple) {
         if (!clientes.containsKey(cliente.getDni())) {
             return false; // el cliente no está registrado
         }
-        if (hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
-            Reserva reserva = new Reserva(cliente, direccion, fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
-            cliente.addReserva(reserva);
-            hotel.addReserva(reserva);
-            return true; // la reserva se hizo correctamente
+        List<Hotel> listaHoteles = new ArrayList<>();
+        for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
+            Hotel hotel = hoteles.getValue();
+            // Sin embargo, cuando reservas lo que mas sentido tiene es por direccion.
+            if (hotel.getDireccion().equals(direccion) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
+                Reserva reserva = new Reserva(cliente, direccion, fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
+                cliente.addReserva(reserva);
+                hotel.addReserva(reserva);
+                return true; // la reserva se hizo correctamente
+            }
         }
         return false; // no hay disponibilidad en el hotel
     }
