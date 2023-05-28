@@ -89,9 +89,7 @@ public class Hotel {
     public record NumHabitaciones(int dobles, int simples) { }
 
     private NumHabitaciones habitacionesOcupadasEnDia(LocalDateTime dia) {
-
-        System.out.println("Reservas actuales: "+ reservasActuales.size());
-
+        //System.out.println("Reservas actuales: "+ reservasActuales.size());
         //if(reservasActuales.isEmpty())
         //    return new NumHabitaciones(0, 0);
 
@@ -104,7 +102,7 @@ public class Hotel {
                 simplesOcupadas += reserva.getNumHabitacionesSimp();
             }
         }
-        System.out.println("dobles: "+doblesOcupadas+" simples: "+simplesOcupadas);
+        //System.out.println("dobles: "+doblesOcupadas+" simples: "+simplesOcupadas);
         return new NumHabitaciones(doblesOcupadas, simplesOcupadas);
     }
     public boolean hayDisponibilidad(

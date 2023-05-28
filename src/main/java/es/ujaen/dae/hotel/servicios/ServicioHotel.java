@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -81,14 +80,14 @@ public class ServicioHotel {
         return cliente;
     }
 
-    public List<Hotel> buscarHoteles(Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
-        System.out.println("----------------!!!!buscarHoteles!!!!-------------------------");
-        System.out.println("Hoteles: "+ hoteles.size());
+    public List<Hotel> buscarHoteles(String ciudad, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
+        //System.out.println("----------------!!!!buscarHoteles!!!!-------------------------");
+        //System.out.println("Hoteles: "+ hoteles.size());
         List<Hotel> listaHoteles = new ArrayList<>();
         for (Map.Entry<Integer, Hotel> hoteles : hoteles.entrySet()) {
 
             Hotel hotel = hoteles.getValue();
-            if (hotel.getDireccion().equals(direccion) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
+            if (hotel.getDireccion().getCiudad().equals(ciudad) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
                 listaHoteles.add(hotel);
             }
         }

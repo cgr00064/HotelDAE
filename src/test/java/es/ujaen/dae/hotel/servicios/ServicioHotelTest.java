@@ -144,7 +144,7 @@ public class ServicioHotelTest {
                 fechaFinReserva1,
                 1,
                 1);
-        hotel.addReserva(reserva1);
+        hotel1.addReserva(reserva1);
 
         LocalDateTime fechaInicioReserva2 = LocalDateTime.of(2023, 05, 20, 00, 00, 00, 00);
         LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
@@ -155,17 +155,16 @@ public class ServicioHotelTest {
                 fechaFinReserva2,
                 0,1
         );
-        hotel.addReserva(reserva2);
+        hotel1.addReserva(reserva2);
 
         List<Hotel> hotelesDisponibles = servicioHotel.buscarHoteles(
-                direccion,
+                "Jaen",
                 LocalDate.of(2023, 5, 20),
                 LocalDate.of(2023, 5, 21),
                 2,
                 1
         );
         Assertions.assertThat(hotelesDisponibles).isEmpty();
-
     }
 
     @Test
