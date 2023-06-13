@@ -13,8 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 
 @SpringBootTest(classes = es.ujaen.dae.hotel.HotelDaeApp.class)
 public class ServicioHotelTest {
@@ -237,14 +235,14 @@ public class ServicioHotelTest {
         hotel1.addReserva(reserva2);
 
         // Realizar la prueba para cuando no hay habitaciones porque estan todas ocupadas
-        boolean resultado = servicioHotel.hacerReserva(cliente1, direccionHotel, LocalDate.of(2023, 5, 20), LocalDate.of(2023, 5, 21), 2, 1);
+        boolean resultado = servicioHotel.hacerReserva(cliente1, hotel.getId(), LocalDate.of(2023, 5, 20), LocalDate.of(2023, 5, 21), 2, 1);
         // Verificar que la reserva no se realizó correctamente
-        assertFalse(resultado);
+        Assertions.assertThat(resultado).isFalse();
 
         // Realizar la prueba para cuando si hay disponibilidad y se puede realizar
-        boolean resultado2 = servicioHotel.hacerReserva(cliente1, direccionHotel, LocalDate.of(2023, 6, 20), LocalDate.of(2023, 6, 21), 2, 1);
+        boolean resultado2 = servicioHotel.hacerReserva(cliente1, hotel.getId(), LocalDate.of(2023, 6, 20), LocalDate.of(2023, 6, 21), 2, 1);
         // Verificar que la reserva no se realizó correctamente
-        assertTrue(resultado2);
+        Assertions.assertThat(resultado2).isTrue();
         //assertTrue(resultado2);
     }
 

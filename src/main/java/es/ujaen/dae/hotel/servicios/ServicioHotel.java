@@ -93,7 +93,7 @@ public class ServicioHotel {
         return listaHoteles;
     }
 
-    boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple) {
+    /*boolean hacerReserva(@NotNull @Valid Cliente cliente, Direccion direccion, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple) {
         if (!clientes.containsKey(cliente.getDni())) {
             return false; // el cliente no está registrado
         }
@@ -110,7 +110,22 @@ public class ServicioHotel {
         }
         return false; // no hay disponibilidad en el hotel
     }
+    */
 
+    boolean hacerReserva(@NotNull @Valid Cliente cliente, int codigoHotel, LocalDate fechaIni, LocalDate fechaFin, int numDoble, int numSimple) {
+        if (!clientes.containsKey(cliente.getDni())) {
+            return false; // el cliente no está registrado
+        }
+        Hotel hotel = hoteles.get(codigoHotel);
+        System.out.println("Id Hotel: " + hoteles.get(codigoHotel));
+        if (hotel != null && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
+            Reserva reserva = new Reserva(cliente, hotel.getDireccion(), fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
+            cliente.addReserva(reserva);
+            hotel.addReserva(reserva);
+            return true; // la reserva se hizo correctamente
+        }
+        return false; // no hay disponibilidad en el hotel o el hotel no existe
+    }
 
     @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
     public void moverReservasPasadasAHistorico() {
