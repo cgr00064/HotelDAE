@@ -117,7 +117,6 @@ public class ServicioHotel {
             return false; // el cliente no está registrado
         }
         Hotel hotel = hoteles.get(codigoHotel);
-        //System.out.println("Id Hotel: " + hoteles.get(codigoHotel));
         if (hotel != null && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
             Reserva reserva = new Reserva(cliente, hotel.getDireccion(), fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
             cliente.addReserva(reserva);
