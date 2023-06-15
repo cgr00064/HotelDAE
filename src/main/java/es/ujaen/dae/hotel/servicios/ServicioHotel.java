@@ -81,8 +81,8 @@ public class ServicioHotel {
     }
 
     public void altaReserva(Reserva reserva, Hotel hotel){
-        repositorioReserva.guardarReserva(reserva);
         hotel.addReserva(reserva);
+        repositorioReserva.guardarReserva(reserva);
         repositorioHotel.actualizarHotel(hotel);
     }
 
@@ -101,7 +101,7 @@ public class ServicioHotel {
         for (Hotel hotel : listaHoteles) {
             if (hotel.getDireccion().getCiudad().equals(ciudad) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
                 hoteles.add(hotel);
-                log.info("Ciudad: " + ciudad);
+                log.info("Ciudad: " + hotel.getDireccion().getCiudad());
             }
         }
         return hoteles;

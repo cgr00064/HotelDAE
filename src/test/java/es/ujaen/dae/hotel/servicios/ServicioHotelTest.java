@@ -112,7 +112,7 @@ public class ServicioHotelTest {
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testBusarHoteles() throws AdministradorYaExiste {
+    public void testBuscarHoteles() throws AdministradorYaExiste {
         Direccion direccion = new Direccion(
                 "España",
                 "Jaen",
@@ -126,12 +126,12 @@ public class ServicioHotelTest {
                 2
         );
 
-        //Damos de alta el hotel
+        // Damos de alta el hotel
         Administrador administrador = new Administrador("cgr0", "clave");
         Administrador administrador2 = servicioHotel.altaAdministrador(administrador);
         Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador2);
 
-        Cliente cliente1 = new Cliente(
+        Cliente cliente = new Cliente(
                 "11111111A",
                 "Juan",
                 "juanito",
@@ -139,7 +139,7 @@ public class ServicioHotelTest {
                 direccion,
                 "605092233",
                 "juanito@gmail.com");
-        servicioHotel.altaCliente(cliente1);
+        Cliente cliente1 = servicioHotel.altaCliente(cliente);
 
         Cliente cliente2 = new Cliente(
                 "11111114A",
@@ -149,7 +149,7 @@ public class ServicioHotelTest {
                 direccion,
                 "605092233",
                 "cgr00064@gmail.com");
-        servicioHotel.altaCliente(cliente2);
+        Cliente cliente3 = servicioHotel.altaCliente(cliente2);
 
         LocalDateTime fechaInicioReserva1 = LocalDateTime.of(2023, 05, 18, 00, 00, 00, 00);
         LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
@@ -159,17 +159,20 @@ public class ServicioHotelTest {
                 fechaFinReserva1,
                 1,
                 1);
-        hotel1.addReserva(reserva1);
+
+        // Guardar el hotel y la reserva
+        servicioHotel.altaReserva(reserva1, hotel1);
 
         LocalDateTime fechaInicioReserva2 = LocalDateTime.of(2023, 05, 20, 00, 00, 00, 00);
         LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva2 = new Reserva(
-                cliente2,
+                cliente3,
                 fechaInicioReserva2,
                 fechaFinReserva2,
-                0,1
+                0,
+                1
         );
-        hotel1.addReserva(reserva2);
+        servicioHotel.altaReserva(reserva2, hotel1);
 
         List<Hotel> hotelesDisponibles = servicioHotel.buscarHoteles(
                 "Jaen",
@@ -181,9 +184,10 @@ public class ServicioHotelTest {
         Assertions.assertThat(hotelesDisponibles).isEmpty();
     }
 
+
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testHacerReserva() throws Exception {
+    public void testHacerReserva() throws AdministradorYaExiste {
         // Crear hotel con habitaciones disponibles
         Direccion direccionHotel = new Direccion(
                 "España",
@@ -196,9 +200,10 @@ public class ServicioHotelTest {
                 2, // 2 habitaciones dobles disponibles
                 2 // 2 habitaciones simples disponibles
         );
-        //Damos de alta el hotel
-        Administrador administrador = new Administrador("mjmp", "clave1");
-        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
+        // Damos de alta el hotel
+        Administrador administrador = new Administrador("cgr0", "clave");
+        Administrador administrador2 = servicioHotel.altaAdministrador(administrador);
+        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador2);
 
         // Crear cliente y agregarlo al servicio
         Direccion direccionCliente = new Direccion(
@@ -216,6 +221,7 @@ public class ServicioHotelTest {
                 "mjmp0027@ujaen.es"
         );
         servicioHotel.altaCliente(cliente1);
+
         Cliente cliente2 = new Cliente(
                 "11111115A",
                 "Carlos",
@@ -225,6 +231,7 @@ public class ServicioHotelTest {
                 "605092233",
                 "cgr00064@gmail.com");
         servicioHotel.altaCliente(cliente2);
+
         LocalDateTime fechaInicioReserva1 = LocalDateTime.of(2023, 05, 18, 00, 00, 00, 00);
         LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva1 = new Reserva(
@@ -233,7 +240,8 @@ public class ServicioHotelTest {
                 fechaFinReserva1,
                 1,
                 1);
-        hotel1.addReserva(reserva1);
+        servicioHotel.altaReserva(reserva1,hotel1);
+        //hotel1.addReserva(reserva1);
 
         LocalDateTime fechaInicioReserva2 = LocalDateTime.of(2023, 05, 20, 00, 00, 00, 00);
         LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
@@ -243,7 +251,8 @@ public class ServicioHotelTest {
                 fechaFinReserva2,
                 0,1
         );
-        hotel1.addReserva(reserva2);
+        servicioHotel.altaReserva(reserva2,hotel1);
+        //hotel1.addReserva(reserva2);
 
         // Realizar la prueba para cuando no hay habitaciones porque estan todas ocupadas
         boolean resultado = servicioHotel.hacerReserva(cliente1, hotel.getId(), LocalDate.of(2023, 5, 20), LocalDate.of(2023, 5, 21), 2, 1);

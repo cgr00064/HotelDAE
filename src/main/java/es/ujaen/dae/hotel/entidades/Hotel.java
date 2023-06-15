@@ -38,7 +38,7 @@ public class Hotel {
     private List<Reserva> reservasActuales;
     private int totalReservasActuales = 0;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "hotel_id_reservas_pasadas")
     private Set<Reserva> reservasPasadas;
     private int totalReservasPasadas = 0;
@@ -54,9 +54,11 @@ public class Hotel {
     }
 
     public void addReserva(Reserva reserva){
-        reserva.setId(totalReservasActuales++);
+        reserva.setId(totalReservasActuales); // Asignar el ID sin incrementar totalReservasActuales
         reservasActuales.add(reserva);
+        totalReservasActuales++; // Incrementar totalReservasActuales después de agregar la reserva
     }
+
 
     public int getNumSimp() {
         return numSimp;
@@ -98,6 +100,9 @@ public class Hotel {
     public record NumHabitaciones(int dobles, int simples) { }
 
     private NumHabitaciones habitacionesOcupadasEnDia(LocalDateTime dia) {
+        //System.out.println("Reservas actuales: "+ reservasActuales.size());
+        //if(reservasActuales.isEmpty())
+        //    return new NumHabitaciones(0, 0);
 
         int doblesOcupadas = 0;
         int simplesOcupadas = 0;
@@ -111,20 +116,27 @@ public class Hotel {
         //System.out.println("dobles: "+doblesOcupadas+" simples: "+simplesOcupadas);
         return new NumHabitaciones(doblesOcupadas, simplesOcupadas);
     }
-
-    public boolean hayDisponibilidad(LocalDateTime fechaInicio, LocalDateTime fechaFin,
+    public boolean hayDisponibilidad(
+            LocalDateTime fechaInicio, LocalDateTime fechaFin,
             int numHabitacionesDobl, int numHabitacionesSimp) {
-                LocalDateTime dia = fechaInicio;
-                while (!dia.isAfter(fechaFin)) {
-                    NumHabitaciones habitacionesOcupadas = habitacionesOcupadasEnDia(dia);
-                    int doblesDisponibles = getNumDobl() - habitacionesOcupadas.dobles();
-                    int simplesDisponibles = getNumSimp() - habitacionesOcupadas.simples();
-                    if (doblesDisponibles < numHabitacionesDobl || simplesDisponibles < numHabitacionesSimp) {
-                        return false;
-                    }
-                    dia = dia.plusDays(1);
-                }
-                return true;
+
+        LocalDateTime dia = fechaInicio;
+
+        while (!dia.isAfter(fechaFin)) {
+
+            NumHabitaciones habitacionesOcupadas = habitacionesOcupadasEnDia(dia);
+
+            int doblesDisponibles = getNumDobl() - habitacionesOcupadas.dobles();
+            int simplesDisponibles = getNumSimp() - habitacionesOcupadas.simples();
+
+            if (doblesDisponibles < numHabitacionesDobl || simplesDisponibles < numHabitacionesSimp) {
+                return false;
+            }
+
+            dia = dia.plusDays(1);
+        }
+
+        return true;
     }
 }
 
