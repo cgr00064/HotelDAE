@@ -2,45 +2,59 @@ package es.ujaen.dae.hotel.entidades;
 
 import es.ujaen.dae.hotel.utils.ExprReg;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
-public class Cliente {
+@NoArgsConstructor
+@Entity
+public class Cliente implements Serializable {
 
     @NotBlank
+    @Id
+    @Size(min=9, max=9)
     @Pattern(regexp = ExprReg.DNI)
-    private final String dni;
+    private String dni;
 
     @NotBlank
-    private final String nombre;
+    private String nombre;
 
     @NotBlank
-    private final String userName;
+    private String userName;
 
     @NotBlank
-    private final String contraseña;
+    private String contraseña;
 
     @NotNull
-    private final Direccion direccion;
+    private Direccion direccion;
 
     @Pattern(regexp = ExprReg.TLF)
-    private final String tlf;
+    private String tlf;
 
     @Email
-    private final String email;
+    private String email;
 
-    private List<Reserva> reservas = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cliente_id_reservas")
+    private List<Reserva> reservas;
     private int totalReservas = 0;
 
+    public Cliente(String dni, String nombre, String userName, String contraseña, Direccion direccion, String tlf, String email){
+        this.dni = dni;
+        this.nombre = nombre;
+        this.userName = userName;
+        this.contraseña = contraseña;
+        this.direccion = direccion;
+        this.tlf = tlf;
+        this.email = email;
+        reservas = new ArrayList<>();
+    }
 
     public List<Reserva> verReservas() {
         return Collections.unmodifiableList(reservas);

@@ -36,7 +36,6 @@ public class ReservaTest {
 
         Reserva reserva = new Reserva(
                 cliente,
-                direccion,
                 fechaInicio,
                 fechaFin,
                 1,

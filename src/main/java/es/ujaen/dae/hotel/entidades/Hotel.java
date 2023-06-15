@@ -1,24 +1,29 @@
 package es.ujaen.dae.hotel.entidades;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Data
+@Entity
+@NoArgsConstructor
 public class Hotel {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @NotBlank
     private String nombre;
 
+    @Embedded
     @NotNull
     private Direccion direccion;
 
@@ -28,20 +33,24 @@ public class Hotel {
     @PositiveOrZero
     private int numDobl;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "hotel_id_reservas_actuales")
     private List<Reserva> reservasActuales;
     private int totalReservasActuales = 0;
 
-    private List<Reserva> reservasPasadas;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id_reservas_pasadas")
+    private Set<Reserva> reservasPasadas;
     private int totalReservasPasadas = 0;
 
-    public Hotel(int id, String nombre, Direccion direccion, int numDobl, int numSimp) {
-        this.id = id;
+    public Hotel(String nombre, Direccion direccion, int numDobl, int numSimp) {
+        //this.id = id;
         this.nombre = nombre;
         this.direccion = direccion;
         this.numSimp = numSimp;
         this.numDobl = numDobl;
         reservasActuales = new ArrayList<>();
-        reservasPasadas = new ArrayList<>();
+        reservasPasadas = new HashSet<>();
     }
 
     public void addReserva(Reserva reserva){
@@ -65,13 +74,13 @@ public class Hotel {
         this.numSimp -= numSimp;
     }
 
-    public List<Reserva> getReservasHistoricas() {
+    public Set<Reserva> getReservasHistoricas() {
         return reservasPasadas;
     }
 
     public void moverReservasPasadasAHistorico() {
         List<Reserva> reservasActuales = this.getReservasActuales();
-        List<Reserva> reservasPasadas = this.getReservasPasadas();
+        Set<Reserva> reservasPasadas = this.getReservasPasadas();
 
         // Mover las reservas pasadas a la lista de reservas históricas
         Iterator<Reserva> iterator = reservasActuales.iterator();
@@ -89,9 +98,6 @@ public class Hotel {
     public record NumHabitaciones(int dobles, int simples) { }
 
     private NumHabitaciones habitacionesOcupadasEnDia(LocalDateTime dia) {
-        //System.out.println("Reservas actuales: "+ reservasActuales.size());
-        //if(reservasActuales.isEmpty())
-        //    return new NumHabitaciones(0, 0);
 
         int doblesOcupadas = 0;
         int simplesOcupadas = 0;
@@ -105,27 +111,20 @@ public class Hotel {
         //System.out.println("dobles: "+doblesOcupadas+" simples: "+simplesOcupadas);
         return new NumHabitaciones(doblesOcupadas, simplesOcupadas);
     }
-    public boolean hayDisponibilidad(
-            LocalDateTime fechaInicio, LocalDateTime fechaFin,
+
+    public boolean hayDisponibilidad(LocalDateTime fechaInicio, LocalDateTime fechaFin,
             int numHabitacionesDobl, int numHabitacionesSimp) {
-
-        LocalDateTime dia = fechaInicio;
-
-        while (!dia.isAfter(fechaFin)) {
-
-            NumHabitaciones habitacionesOcupadas = habitacionesOcupadasEnDia(dia);
-
-            int doblesDisponibles = getNumDobl() - habitacionesOcupadas.dobles();
-            int simplesDisponibles = getNumSimp() - habitacionesOcupadas.simples();
-
-            if (doblesDisponibles < numHabitacionesDobl || simplesDisponibles < numHabitacionesSimp) {
-                return false;
-            }
-
-            dia = dia.plusDays(1);
-        }
-
-        return true;
+                LocalDateTime dia = fechaInicio;
+                while (!dia.isAfter(fechaFin)) {
+                    NumHabitaciones habitacionesOcupadas = habitacionesOcupadasEnDia(dia);
+                    int doblesDisponibles = getNumDobl() - habitacionesOcupadas.dobles();
+                    int simplesDisponibles = getNumSimp() - habitacionesOcupadas.simples();
+                    if (doblesDisponibles < numHabitacionesDobl || simplesDisponibles < numHabitacionesSimp) {
+                        return false;
+                    }
+                    dia = dia.plusDays(1);
+                }
+                return true;
     }
 }
 

@@ -1,12 +1,15 @@
 package es.ujaen.dae.hotel.servicios;
 
 import es.ujaen.dae.hotel.entidades.*;
+import es.ujaen.dae.hotel.excepciones.AdministradorYaExiste;
+import es.ujaen.dae.hotel.excepciones.ClienteNoRegistrado;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
@@ -15,11 +18,13 @@ import java.util.List;
 
 
 @SpringBootTest(classes = es.ujaen.dae.hotel.HotelDaeApp.class)
+@ActiveProfiles(profiles = {"test"})
 public class ServicioHotelTest {
 
     @Autowired
     ServicioHotel servicioHotel;
 
+    //Accedemos al sistema
     @Test
     public void testAccesoServicioHotel() {
         Assertions.assertThat(servicioHotel).isNotNull();
@@ -49,30 +54,32 @@ public class ServicioHotelTest {
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
+    //Damos de alta hotel y su dirección
     @Test
-    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testAltaHotel() throws Exception {
+    public void testAltaHotel() throws AdministradorYaExiste {
         Direccion direccion = new Direccion(
+
                 "España",
                 "Jaen",
                 "SanJuan",
                 19);
         Hotel hotel = new Hotel(
-                2,
                 "hotel",
                 direccion,
-                2,
-                2
+                20,
+                30
         );
-        
+
+        //Creamos administrador
         Administrador administrador = new Administrador("mjmp", "clave1");
-        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
+        Administrador administrador1 = servicioHotel.altaAdministrador(administrador);
+        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador1);
         Assertions.assertThat(hotel1).isNotNull();
     }
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testAltaYLoginCliente() throws Exception {
+    public void testAltaYLoginCliente() {
         String clave = "manuel82";
         Direccion direccion = new Direccion(
                 "España",
@@ -80,7 +87,7 @@ public class ServicioHotelTest {
                 "SanJuan",
                 19);
         Cliente cliente = new Cliente(
-                "12345678Q",
+                "21036345H",
                 "Manuel Jesus",
                 "mjmp0027",
                 clave,
@@ -90,31 +97,39 @@ public class ServicioHotelTest {
         );
 
         Cliente cliente1 = servicioHotel.altaCliente(cliente);
-        Cliente clienteLogin = servicioHotel.loginCliente(cliente.getUserName(), "manuel82")
-                .orElseThrow(() -> new Exception("Cliente vacio"));
+
+        Cliente clienteLogin = servicioHotel.loginCliente(cliente.getDni(), "manuel82")
+                .orElseThrow(() -> new ClienteNoRegistrado());
 
         Assertions.assertThat(clienteLogin).isNotNull();
-        Assertions.assertThat(clienteLogin).isEqualTo(cliente1);
+        Assertions.assertThat(clienteLogin.getDni()).isEqualTo(cliente1.getDni());
+        Assertions.assertThat(clienteLogin.getNombre()).isEqualTo(cliente1.getNombre());
+        Assertions.assertThat(clienteLogin.getUserName()).isEqualTo(cliente1.getUserName());
+        Assertions.assertThat(clienteLogin.getContraseña()).isEqualTo(cliente1.getContraseña());
+        Assertions.assertThat(clienteLogin.getDireccion()).isEqualTo(cliente1.getDireccion());
+
     }
 
     @Test
     @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
-    public void testBusarHoteles() throws Exception {
+    public void testBusarHoteles() throws AdministradorYaExiste {
         Direccion direccion = new Direccion(
                 "España",
                 "Jaen",
                 "SanJuan",
                 19);
+
         Hotel hotel = new Hotel(
-                2,
                 "hotel",
                 direccion,
                 2,
                 2
         );
+
         //Damos de alta el hotel
-        Administrador administrador = new Administrador("mjmp", "clave1");
-        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador);
+        Administrador administrador = new Administrador("cgr0", "clave");
+        Administrador administrador2 = servicioHotel.altaAdministrador(administrador);
+        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador2);
 
         Cliente cliente1 = new Cliente(
                 "11111111A",
@@ -125,6 +140,7 @@ public class ServicioHotelTest {
                 "605092233",
                 "juanito@gmail.com");
         servicioHotel.altaCliente(cliente1);
+
         Cliente cliente2 = new Cliente(
                 "11111114A",
                 "Carlos",
@@ -139,7 +155,6 @@ public class ServicioHotelTest {
         LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva1 = new Reserva(
                 cliente1,
-                direccion,
                 fechaInicioReserva1,
                 fechaFinReserva1,
                 1,
@@ -150,7 +165,6 @@ public class ServicioHotelTest {
         LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva2 = new Reserva(
                 cliente2,
-                direccion,
                 fechaInicioReserva2,
                 fechaFinReserva2,
                 0,1
@@ -177,7 +191,6 @@ public class ServicioHotelTest {
                 "SanJuan",
                 19);
         Hotel hotel = new Hotel(
-                2,
                 "hotel",
                 direccionHotel,
                 2, // 2 habitaciones dobles disponibles
@@ -216,7 +229,6 @@ public class ServicioHotelTest {
         LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva1 = new Reserva(
                 cliente1,
-                direccionHotel,
                 fechaInicioReserva1,
                 fechaFinReserva1,
                 1,
@@ -227,7 +239,6 @@ public class ServicioHotelTest {
         LocalDateTime fechaFinReserva2 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
         Reserva reserva2 = new Reserva(
                 cliente2,
-                direccionHotel,
                 fechaInicioReserva2,
                 fechaFinReserva2,
                 0,1
