@@ -21,15 +21,24 @@ docker exec mysql-db mysql -psecret -e "create database hoteldae; use hoteldae; 
 ```
 
 Este comando ejecuta la utilidad de administración `mysql` dentro del contenedor,
-crea la base de datos *ujacoin*, un usuario con el mismo nombre y clave _secret_
+crea la base de datos *hoteldae*, un usuario con el mismo nombre y clave _secret_
 y finalmente le otorga los permisos necesarios para trabajar con la base
 de datos.
 
-Para el testing, crear una nueva base de datos ujacoin_test y dar permisos al usuario creado anteriormente.
+Para el testing, crear una nueva base de datos hoteldae_test y dar permisos al usuario creado anteriormente.
 
 ```
 docker exec mysql-db mysql -psecret -e "create database hoteldae_test; use hoteldae_test; grant all privileges on hoteldae_test.* to 'hoteldae'@'%'"
 ```
 
+Una vez ya hemos realizado estos paso en la terminal de windows, vamos a la aplicación Docker Desktop y una vez estamos dentro del contenedor con el cliente arrancado, ejecutamos: 
+```
+sh-4.4# mysql -p 
+secret
+Welcome to the MySQL monitor. Commands ends with ; or \g
+mysql>use hoteldae
+mysql>show tables
+mysql>SELECT * FROM hotel;
+```
 
 

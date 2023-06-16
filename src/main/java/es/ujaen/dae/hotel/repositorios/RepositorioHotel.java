@@ -1,5 +1,6 @@
 package es.ujaen.dae.hotel.repositorios;
 
+import es.ujaen.dae.hotel.entidades.Direccion;
 import es.ujaen.dae.hotel.entidades.Hotel;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,6 +38,18 @@ public class RepositorioHotel {
         try {
             Query q = em.createQuery("SELECT h FROM Hotel h WHERE h.direccion.ciudad = :ciudad", Hotel.class);
             q.setParameter("ciudad", ciudad);
+            hoteles = q.getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+        }
+        return hoteles;
+    }
+
+    public List<Hotel> buscarHotelesPorDireccion(Direccion direccion) {
+        List<Hotel> hoteles = new ArrayList<>();
+        try {
+            Query q = em.createQuery("Select h from Hotel h where h.direccion=:direccion", Hotel.class);
+            q.setParameter("direccion", direccion);
             hoteles = q.getResultList();
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);

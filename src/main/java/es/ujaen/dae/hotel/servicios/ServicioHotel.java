@@ -68,8 +68,6 @@ public class ServicioHotel {
         throw new AdministradorNoValido();
     }
 
-
-
     //Damos de alta el administrador en el sistema
     public Administrador altaAdministrador(@NotNull @Valid Administrador administrador) throws AdministradorYaExiste {
         if (repositorioAdministrador.buscarAdminPorUserName(administrador.getUserName()).isPresent()) {
@@ -79,15 +77,17 @@ public class ServicioHotel {
             return administrador;
         }
     }
-
+    //TODO comprobar que la reserva existe.
     public void altaReserva(Reserva reserva, Hotel hotel){
-        hotel.addReserva(reserva);
         repositorioReserva.guardarReserva(reserva);
+        hotel.addReserva(reserva);
+        log.info("Mostrando reserva: " + reserva.toString());
+        log.info("Mostrando reservas: " + hotel.getReservasActuales());
+        //TODO comprobar que el hotel existe.
         repositorioHotel.actualizarHotel(hotel);
     }
 
     //Hacemos el login del cliente
-    //@Transactional
     public Optional<Cliente> loginCliente(@NotNull String dni, @NotNull String clave) {
         Optional<Cliente> clienteLogin = repositorioCliente.buscarPorDNI(dni)
                 .filter((cliente) -> cliente.claveValida(clave));

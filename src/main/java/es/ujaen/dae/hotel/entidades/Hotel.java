@@ -33,18 +33,17 @@ public class Hotel {
     @PositiveOrZero
     private int numDobl;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "hotel_id_reservas_actuales")
     private List<Reserva> reservasActuales;
     private int totalReservasActuales = 0;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)//LAZY da error
     @JoinColumn(name = "hotel_id_reservas_pasadas")
     private Set<Reserva> reservasPasadas;
     private int totalReservasPasadas = 0;
 
     public Hotel(String nombre, Direccion direccion, int numDobl, int numSimp) {
-        //this.id = id;
         this.nombre = nombre;
         this.direccion = direccion;
         this.numSimp = numSimp;
@@ -54,11 +53,9 @@ public class Hotel {
     }
 
     public void addReserva(Reserva reserva){
-        reserva.setId(totalReservasActuales); // Asignar el ID sin incrementar totalReservasActuales
+        reserva.setId(totalReservasActuales++);
         reservasActuales.add(reserva);
-        totalReservasActuales++; // Incrementar totalReservasActuales después de agregar la reserva
     }
-
 
     public int getNumSimp() {
         return numSimp;
