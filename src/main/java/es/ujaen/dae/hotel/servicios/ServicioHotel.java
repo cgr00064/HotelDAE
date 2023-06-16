@@ -38,12 +38,10 @@ public class ServicioHotel {
 
     //Damos de alta el cliente en el sistema
     public Cliente altaCliente(@NotNull @Valid Cliente cliente) throws ClienteNoRegistrado {
-        log.info("Cliente con datos: " + cliente + " registrandose");
         if (repositorioCliente.buscarPorDNI(cliente.getDni()).isPresent()) {
             throw new ClienteYaRegistrado();
         } else {
             repositorioCliente.guardarCliente(cliente);
-            log.info("Cliente con datos: " + cliente + " registrado");
             return cliente;
         }
     }
@@ -54,13 +52,11 @@ public class ServicioHotel {
         if (adminOptional.isPresent()) {
             Administrador admin = adminOptional.get();
             if (admin.getContraseña().equals(administrador.getContraseña())) {
-                log.info("Hotel con datos: " + hotel + " registrandose");
                 Optional<Hotel> hotelExistente = repositorioHotel.buscarHotelPorId(hotel.getId());
                 if (hotelExistente.isPresent()) {
                     throw new HotelYaExiste();
                 } else {
                     repositorioHotel.guardarHotel(hotel);
-                    log.info("Hotel con datos: " + hotel + " registrado");
                     return hotel;
                 }
             }
@@ -77,15 +73,20 @@ public class ServicioHotel {
             return administrador;
         }
     }
-    //TODO comprobar que la reserva existe.
-    public void altaReserva(Reserva reserva, Hotel hotel){
+
+    public void altaReserva(Reserva reserva, Hotel hotel) throws HotelNoExiste {
         repositorioReserva.guardarReserva(reserva);
-        hotel.addReserva(reserva);
-        log.info("Mostrando reserva: " + reserva.toString());
-        log.info("Mostrando reservas: " + hotel.getReservasActuales());
-        //TODO comprobar que el hotel existe.
-        repositorioHotel.actualizarHotel(hotel);
+
+        // Comprobar que el hotel existe
+        Optional<Hotel> hotelExistente = repositorioHotel.buscarHotelPorId(hotel.getId());
+        if (hotelExistente.isEmpty()) {
+            throw new HotelNoExiste();
+        }
+
+        hotelExistente.get().addReserva(reserva);
+        repositorioHotel.actualizarHotel(hotelExistente.get());
     }
+
 
     //Hacemos el login del cliente
     public Optional<Cliente> loginCliente(@NotNull String dni, @NotNull String clave) {
@@ -97,11 +98,9 @@ public class ServicioHotel {
     public List<Hotel> buscarHoteles(String ciudad, LocalDate fechaIni, LocalDate fechaFin, int numHabitacionesSimp, int numHabitacionesDobl) {
         List<Hotel> hoteles = new ArrayList<>();
         List<Hotel> listaHoteles = repositorioHotel.buscarHotelesPorCiudad(ciudad);
-        log.info("Lista hoteles: " + listaHoteles );
         for (Hotel hotel : listaHoteles) {
             if (hotel.getDireccion().getCiudad().equals(ciudad) && hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numHabitacionesSimp, numHabitacionesDobl)) {
                 hoteles.add(hotel);
-                log.info("Ciudad: " + hotel.getDireccion().getCiudad());
             }
         }
         return hoteles;
@@ -117,11 +116,9 @@ public class ServicioHotel {
 
             if (hotel.hayDisponibilidad(fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble)) {
                 Reserva reserva = new Reserva(clienteEncontrado, fechaIni.atStartOfDay(), fechaFin.atStartOfDay(), numSimple, numDoble);
-                clienteEncontrado.addReserva(reserva);
                 hotel.addReserva(reserva);
 
                 repositorioCliente.actualizarCliente(clienteEncontrado);
-                repositorioHotel.actualizarHotel(hotel);
 
                 return true; // la reserva se hizo correctamente
             }
@@ -129,8 +126,6 @@ public class ServicioHotel {
 
         return false; // no hay disponibilidad en el hotel o el cliente o el hotel no existen
     }
-
-
 
     @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
     @Transactional

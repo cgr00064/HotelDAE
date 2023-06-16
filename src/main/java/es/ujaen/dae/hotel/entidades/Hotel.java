@@ -38,7 +38,7 @@ public class Hotel {
     private List<Reserva> reservasActuales;
     private int totalReservasActuales = 0;
 
-    @OneToMany(fetch = FetchType.EAGER)//LAZY da error
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)//LAZY da error
     @JoinColumn(name = "hotel_id_reservas_pasadas")
     private Set<Reserva> reservasPasadas;
     private int totalReservasPasadas = 0;
@@ -53,8 +53,9 @@ public class Hotel {
     }
 
     public void addReserva(Reserva reserva){
-        reserva.setId(totalReservasActuales++);
+        reserva.setId(totalReservasActuales);
         reservasActuales.add(reserva);
+        totalReservasActuales++;
     }
 
     public int getNumSimp() {
@@ -97,9 +98,6 @@ public class Hotel {
     public record NumHabitaciones(int dobles, int simples) { }
 
     private NumHabitaciones habitacionesOcupadasEnDia(LocalDateTime dia) {
-        //System.out.println("Reservas actuales: "+ reservasActuales.size());
-        //if(reservasActuales.isEmpty())
-        //    return new NumHabitaciones(0, 0);
 
         int doblesOcupadas = 0;
         int simplesOcupadas = 0;

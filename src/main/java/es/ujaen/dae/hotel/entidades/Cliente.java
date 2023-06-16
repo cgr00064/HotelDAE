@@ -68,8 +68,4 @@ public class Cliente implements Serializable {
         return contraseña.equals(clave);
     }
 
-    public void addReserva(Reserva reserva) {
-        reserva.setId(totalReservas++);
-        reservas.add(reserva);
-    }
 }

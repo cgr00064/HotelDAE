@@ -41,8 +41,6 @@ public class ReservaTest {
                 1,
                 2);
 
-        cliente.addReserva(reserva);
-
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<Reserva>> violations = validator.validate(reserva);
 
