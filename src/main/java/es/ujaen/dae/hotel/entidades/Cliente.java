@@ -4,12 +4,10 @@ import es.ujaen.dae.hotel.utils.ExprReg;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.validation.constraints.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -39,12 +37,12 @@ public class Cliente implements Serializable {
 
     @Email
     private String email;
-
+/*
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "cliente_id_reservas")
     private List<Reserva> reservas;
     private int totalReservas = 0;
-
+*/
     public Cliente(String dni, String nombre, String userName, String contraseña, Direccion direccion, String tlf, String email){
         this.dni = dni;
         this.nombre = nombre;
@@ -53,9 +51,9 @@ public class Cliente implements Serializable {
         this.direccion = direccion;
         this.tlf = tlf;
         this.email = email;
-        reservas = new ArrayList<>();
+        //reservas = new ArrayList<>();
     }
-
+/*
     public List<Reserva> verReservas() {
         return Collections.unmodifiableList(reservas);
     }
@@ -63,9 +61,8 @@ public class Cliente implements Serializable {
     public Reserva verReserva(int idReserva) {
         return reservas.get(idReserva);
     }
-
+*/
     public boolean claveValida(String clave) {
         return contraseña.equals(clave);
     }
-
 }

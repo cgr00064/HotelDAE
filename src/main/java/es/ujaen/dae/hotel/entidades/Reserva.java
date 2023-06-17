@@ -48,8 +48,5 @@ public class Reserva implements Serializable {
                 //(dia.equals(this.fechaFin) || dia.isBefore(this.fechaFin))));
         return ((dia.equals(this.fechaInicio) || dia.isAfter(this.fechaInicio) ) &&
                 (dia.equals(this.fechaFin) || dia.isBefore(this.fechaFin)));
-
-
     }
-
 }

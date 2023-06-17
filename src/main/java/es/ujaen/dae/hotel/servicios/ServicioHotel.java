@@ -136,7 +136,4 @@ public class ServicioHotel {
             repositorioHotel.actualizarHotel(hotel);
         }
     }
-
 }
-
-
