@@ -172,6 +172,9 @@ public class ServicioHotelTest {
         );
         servicioHotel.altaReserva(reserva2, hotel1);
 
+        List<Reserva> reservasActuales = hotel1.getReservasActuales();
+        Assertions.assertThat(reservasActuales).hasSize(2);
+
         List<Hotel> hotelesDisponibles = servicioHotel.buscarHoteles(
                 "Jaen",
                 LocalDate.of(2023, 5, 20),
@@ -330,7 +333,87 @@ public class ServicioHotelTest {
         boolean resultado = servicioHotel.hacerReserva(cliente1, hotel.getId(), LocalDate.of(2023, 8, 20), LocalDate.of(2023, 8, 21), 2, 1);
         // Verificar que la reserva no se realizó correctamente
         Assertions.assertThat(resultado).isTrue();
+    }
+
+    //TODO Hacer Test trasvasarReservas()
+    @Test
+    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
+    public void testTrasvasarReservas() throws AdministradorYaExiste {
+
+        Direccion direccion = new Direccion(
+                "España",
+                "Jaen",
+                "SanJuan",
+                19);
+
+        Hotel hotel = new Hotel(
+                "hotel",
+                direccion,
+                2,
+                2
+        );
+
+        // Damos de alta el hotel
+        Administrador administrador = new Administrador("cgr0", "clave");
+        Administrador administrador2 = servicioHotel.altaAdministrador(administrador);
+        Hotel hotel1 = servicioHotel.altaHotel(hotel, administrador2);
+
+        Cliente cliente = new Cliente(
+                "11111111A",
+                "Juan",
+                "juanito",
+                "contraseña",
+                direccion,
+                "605092233",
+                "juanito@gmail.com");
+        Cliente cliente1 = servicioHotel.altaCliente(cliente);
+
+        Cliente cliente2 = new Cliente(
+                "11111114A",
+                "Carlos",
+                "carlosgr99",
+                "1234",
+                direccion,
+                "605092233",
+                "cgr00064@gmail.com");
+        Cliente cliente3 = servicioHotel.altaCliente(cliente2);
+
+        LocalDateTime fechaInicioReserva1 = LocalDateTime.of(2023, 05, 18, 00, 00, 00, 00);
+        LocalDateTime fechaFinReserva1 = LocalDateTime.of(2023, 05, 21, 00, 00, 00, 00);
+        Reserva reserva1 = new Reserva(
+                cliente1,
+                fechaInicioReserva1,
+                fechaFinReserva1,
+                1,
+                1);
+        // Guardar el hotel y la reserva
+        servicioHotel.altaReserva(reserva1, hotel1);
+
+        LocalDateTime fechaInicioReserva2 = LocalDateTime.of(2024, 05, 20, 00, 00, 00, 00);
+        LocalDateTime fechaFinReserva2 = LocalDateTime.of(2024, 05, 21, 00, 00, 00, 00);
+        Reserva reserva2 = new Reserva(
+                cliente3,
+                fechaInicioReserva2,
+                fechaFinReserva2,
+                0,
+                1
+        );
+        servicioHotel.altaReserva(reserva2, hotel1);
+
+        List<Reserva> reservasActuales = hotel1.getReservasActuales();
+        Assertions.assertThat(reservasActuales).hasSize(2);
+
+        servicioHotel.realizarTrasvaseReservasCerradas(hotel1.getId());
+        hotel1 = servicioHotel.buscarHotelPorId(hotel1.getId()).get();
+
+        // Verificar que las reservas estén en la lista de reservas cerradas del hotel
+        Assertions.assertThat(hotel1.getReservasActuales()).hasSize(1);
+        //System.out.println("TEST: " + hotel1.getReservasCerradas());
+        Assertions.assertThat(hotel1.getReservasCerradas()).hasSize(1);
 
     }
 
+
 }
+
+
