@@ -1,9 +1,13 @@
 package es.ujaen.dae.hotel.servicios;
 
-import es.ujaen.dae.hotel.entidades.*;
+import es.ujaen.dae.hotel.entidades.Administrador;
+import es.ujaen.dae.hotel.entidades.Cliente;
+import es.ujaen.dae.hotel.entidades.Hotel;
+import es.ujaen.dae.hotel.entidades.Reserva;
 import es.ujaen.dae.hotel.excepciones.*;
 import es.ujaen.dae.hotel.repositorios.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,8 +17,10 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -28,7 +34,6 @@ public class ServicioHotel {
     RepositorioHotel repositorioHotel;
     @Autowired
     RepositorioReserva repositorioReserva;
-
     @Autowired
     RepositorioReservaCerradas repositorioReservaCerradas;
 
@@ -120,7 +125,34 @@ public class ServicioHotel {
         return false; // no hay disponibilidad en el hotel o el cliente o el hotel no existen
     }
 
-    //Ejercicio voluntario 1
+    //Opcion 1 para que reservasPasadas funcione con LAZY
+    @Transactional
+    public Set<Reserva> obtenerReservasPasadas(int idHotel) {
+        Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(idHotel);
+        if (hotelOptional.isPresent()) {
+            Hotel hotel = hotelOptional.get();
+            hotel.getReservasPasadas();
+            Hibernate.initialize(hotel.getReservasPasadas());
+            return hotel.getReservasPasadas();
+
+        }else{
+            throw new HotelNoExiste();
+        }
+    }
+    //Opcion 2 para que reservasPasadas funcione con lazy
+    @Transactional
+    public Hotel obtenerHotelConReservasPasadas(int idHotel) {
+        Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(idHotel);
+        if (hotelOptional.isPresent()) {
+            Hotel hotel = hotelOptional.get();
+            hotel.getReservasPasadas().size(); // Accede a la colección para inicializarla
+            return hotel;
+        } else {
+            throw new HotelNoExiste();
+        }
+    }
+
+    //Ejercicio voluntario
     @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
     @Transactional
     public void moverReservasPasadasAHistorico() {
@@ -131,49 +163,5 @@ public class ServicioHotel {
             repositorioHotel.actualizarHotel(hotel);
         }
     }
-
-    //Ejercicio voluntario 2
-    public void realizarTrasvaseReservasCerradas(int hotelId) {
-        Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(hotelId);
-        if (hotelOptional.isPresent()) {
-            Hotel hotel = hotelOptional.get();
-
-            List<Reserva> reservasActuales = hotel.getReservasActuales() != null ? hotel.getReservasActuales() : new ArrayList<>();
-            Set<Reserva> reservasPasadas = hotel.getReservasPasadas() != null ? hotel.getReservasPasadas() : new HashSet<>();
-            Set<ReservaCerrada> reservasCerradas = new HashSet<>();
-
-            List<Reserva> copiaReservasActuales = new ArrayList<>(reservasActuales);
-
-            // Mover las reservas pasadas a la lista de reservas históricas y cerradas
-            for (Reserva reserva : copiaReservasActuales) {
-                if (reserva.getFechaFin() != null && reserva.getFechaFin().isBefore(LocalDateTime.now())) {
-                    log.info("Reservas:" + reserva.toString());
-                    Optional<Reserva> reservaOptional = repositorioReserva.buscarReservaPorClienteFechas(reserva.getCliente().getDni(), reserva.getFechaInicio(), reserva.getFechaFin());
-                    if (reservaOptional.isPresent()) {
-                        repositorioReserva.eliminarReserva(reserva.getId());  // Eliminar primero de la base de datos
-
-                        reservasActuales.remove(reserva);
-                        hotel.setNumSimp(reserva.getNumHabitacionesSimp());
-                        hotel.setNumDobl(reserva.getNumHabitacionesDobl());
-                        reservasPasadas.add(reserva);
-
-                        ReservaCerrada reservaCerrada = new ReservaCerrada(reserva);
-                        repositorioReservaCerradas.guardarReservaCerrada(reservaCerrada);
-                        reservasCerradas.add(reservaCerrada);
-                        hotel.setReservasCerradas(reservasCerradas);
-                        hotel.setReservasActuales(reservasActuales);
-                        repositorioHotel.actualizarHotel(hotel);
-                    }
-                }
-            }
-            //log.info("Reservas Actuales:" + reservasActuales);
-            //log.info("Reservas Actuales Hotel:" + hotel.getReservasActuales());
-            //log.info("Reservas Cerradas:" + reservasCerradas);
-            //log.info("Reservas Cerradas Hotel:" + hotel.getReservasCerradas());
-        } else {
-            throw new HotelNoExiste();
-        }
-    }
-
 
 }

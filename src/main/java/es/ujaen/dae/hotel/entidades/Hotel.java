@@ -38,15 +38,11 @@ public class Hotel {
     private List<Reserva> reservasActuales;
     private int totalReservasActuales = 0;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "hotel_id_reservas_pasadas")
     private Set<Reserva> reservasPasadas;
     private int totalReservasPasadas = 0;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "hotel_id_reservas_cerradas")
-    private Set<ReservaCerrada> reservasCerradas;
-    private int totalReservasCerradas = 0;
 
     public Hotel(String nombre, Direccion direccion, int numDobl, int numSimp) {
         this.nombre = nombre;
@@ -55,7 +51,6 @@ public class Hotel {
         this.numDobl = numDobl;
         reservasActuales = new ArrayList<>();
         reservasPasadas = new HashSet<>();
-        reservasCerradas = new HashSet<>();
     }
 
     public void addReserva(Reserva reserva){
@@ -81,9 +76,8 @@ public class Hotel {
         this.numSimp -= numSimp;
     }
 
-    public Set<Reserva> getReservasHistoricas() {
-        return reservasPasadas;
-    }
+
+
 
     public void moverReservasPasadasAHistorico() {
         List<Reserva> reservasActuales = this.getReservasActuales();
