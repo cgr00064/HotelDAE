@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class ReservaCerrada implements Serializable {
+public class ReservasPasadas implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -35,7 +35,7 @@ public class ReservaCerrada implements Serializable {
     @PositiveOrZero
     private int numHabitacionesDobl;
 
-    public ReservaCerrada(Reserva reserva) {
+    public ReservasPasadas(Reserva reserva) {
         this.cliente = reserva.getCliente();
         this.fechaInicio = reserva.getFechaInicio();
         this.fechaFin = reserva.getFechaFin();

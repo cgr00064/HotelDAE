@@ -409,7 +409,7 @@ public class ServicioHotelTest {
         // Verificar que las reservas estén en la lista de reservas cerradas del hotel
         //Opcion Lazy_1
         Assertions.assertThat(hotel1.getReservasActuales()).hasSize(1);
-        Set<Reserva> reservasPasadas =  servicioHotel.obtenerReservasPasadas(hotel1.getId());
+        Set<ReservasPasadas> reservasPasadas =  servicioHotel.obtenerReservasPasadas(hotel1.getId());
         Assertions.assertThat(reservasPasadas).hasSize(1);
         System.out.println("TEST reservas Pasadas: " + reservasPasadas);
         System.out.println("TEST reservas Actuales: " + hotel1.getReservasActuales());

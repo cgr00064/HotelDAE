@@ -40,7 +40,7 @@ public class Hotel {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "hotel_id_reservas_pasadas")
-    private Set<Reserva> reservasPasadas;
+    private Set<ReservasPasadas> reservasPasadas;
     private int totalReservasPasadas = 0;
 
 
@@ -77,24 +77,42 @@ public class Hotel {
     }
 
 
-
-
     public void moverReservasPasadasAHistorico() {
+        LocalDate currentDate = LocalDate.now();
         List<Reserva> reservasActuales = this.getReservasActuales();
-        Set<Reserva> reservasPasadas = this.getReservasPasadas();
+        Set<Reserva> reservasAMover = new HashSet<>();
+        Set<ReservasPasadas> reservasPasadas = this.getReservasPasadas();
 
-        // Mover las reservas pasadas a la lista de reservas históricas
-        Iterator<Reserva> iterator = reservasActuales.iterator();
-        while (iterator.hasNext()) {
-            Reserva reserva = iterator.next();
-            if (reserva.getFechaFin().isBefore(LocalDate.now().atStartOfDay())) {
-                iterator.remove();
-                this.setNumSimp(reserva.getNumHabitacionesSimp());
-                this.setNumDobl(reserva.getNumHabitacionesDobl());
-                reservasPasadas.add(reserva);
+        reservasActuales.removeIf(reserva -> {
+            if (reserva.getFechaFin().isBefore(currentDate.atStartOfDay())) {
+                reservasAMover.add(reserva);
+                return true;
             }
+            return false;
+        });
+
+        for (Reserva reserva : reservasAMover) {
+            ReservasPasadas reservaPasada = new ReservasPasadas(reserva);
+            reservasPasadas.add(reservaPasada);
         }
+
+        // Actualizar los contadores de habitaciones simples y dobles
+        int numSimp = 0;
+        int numDobl = 0;
+        for (Reserva reserva : reservasActuales) {
+            numSimp += reserva.getNumHabitacionesSimp();
+            numDobl += reserva.getNumHabitacionesDobl();
+        }
+        this.setNumSimp(numSimp);
+        this.setNumDobl(numDobl);
+
+        // Actualizar las listas de reservas actuales y pasadas después de completar el bucle
+        this.setReservasActuales(reservasActuales);
+        this.setReservasPasadas(reservasPasadas);
     }
+
+
+
 
     public record NumHabitaciones(int dobles, int simples) { }
 

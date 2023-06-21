@@ -1,9 +1,6 @@
 package es.ujaen.dae.hotel.servicios;
 
-import es.ujaen.dae.hotel.entidades.Administrador;
-import es.ujaen.dae.hotel.entidades.Cliente;
-import es.ujaen.dae.hotel.entidades.Hotel;
-import es.ujaen.dae.hotel.entidades.Reserva;
+import es.ujaen.dae.hotel.entidades.*;
 import es.ujaen.dae.hotel.excepciones.*;
 import es.ujaen.dae.hotel.repositorios.*;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +32,7 @@ public class ServicioHotel {
     @Autowired
     RepositorioReserva repositorioReserva;
     @Autowired
-    RepositorioReservaCerradas repositorioReservaCerradas;
+    RepositorioReservasPasadas repositorioReservasPasadas;
 
     //Damos de alta el cliente en el sistema
     public Cliente altaCliente(@NotNull @Valid Cliente cliente) throws ClienteNoRegistrado {
@@ -127,7 +124,7 @@ public class ServicioHotel {
 
     //Opcion 1 para que reservasPasadas funcione con LAZY
     @Transactional
-    public Set<Reserva> obtenerReservasPasadas(int idHotel) {
+    public Set<ReservasPasadas> obtenerReservasPasadas(int idHotel) {
         Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(idHotel);
         if (hotelOptional.isPresent()) {
             Hotel hotel = hotelOptional.get();
@@ -139,6 +136,7 @@ public class ServicioHotel {
             throw new HotelNoExiste();
         }
     }
+
     //Opcion 2 para que reservasPasadas funcione con lazy
     @Transactional
     public Hotel obtenerHotelConReservasPasadas(int idHotel) {
@@ -156,10 +154,16 @@ public class ServicioHotel {
     @Scheduled(cron = "0 0 3 * * *") // se ejecutará todos los días a las 3:00
     @Transactional
     public void moverReservasPasadasAHistorico() {
-
         List<Hotel> hoteles = repositorioHotel.buscarTodosLosHoteles();
         for (Hotel hotel : hoteles) {
             hotel.moverReservasPasadasAHistorico();
+            for (Reserva reserva : hotel.getReservasActuales()) {
+                repositorioReserva.actualizarReserva(reserva);
+            }
+
+            for (ReservasPasadas reservaPasada : hotel.getReservasPasadas()) {
+                repositorioReservasPasadas.guardarReservaCerrada(reservaPasada);
+            }
             repositorioHotel.actualizarHotel(hotel);
         }
     }

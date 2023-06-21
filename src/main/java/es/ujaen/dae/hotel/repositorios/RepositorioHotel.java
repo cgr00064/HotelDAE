@@ -67,7 +67,4 @@ public class RepositorioHotel {
         em.merge(hotel);
     }
 
-    public void moverReservasPasadasAHistorico(Hotel hotel){
-        hotel.moverReservasPasadasAHistorico();
-    }
 }

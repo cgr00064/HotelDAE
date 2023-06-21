@@ -37,7 +37,7 @@ sh-4.4# mysql -p
 secret
 Welcome to the MySQL monitor. Commands ends with ; or \g
 mysql>use hoteldae
-mysql>show tables
+mysql>SHOW TABLES;
 mysql>SELECT * FROM hotel;
 ```
 

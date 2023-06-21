@@ -57,12 +57,10 @@ public class HotelTest {
         hotel.moverReservasPasadasAHistorico();
 
         List<Reserva> reservasActuales = hotel.getReservasActuales();
-        Set<Reserva> reservasPasadas = hotel.getReservasPasadas();
+        Set<ReservasPasadas> reservasPasadas = hotel.getReservasPasadas();
 
-        Assertions.assertThat(0).isEqualTo(reservasActuales.size());
-        Assertions.assertThat(2).isEqualTo(reservasPasadas.size());
-        Assertions.assertThat(reservasPasadas.contains(reservaPasada1)).isTrue();
-        Assertions.assertThat(reservasPasadas.contains(reservaPasada2)).isTrue();
+        Assertions.assertThat(reservasActuales.size()).isEqualTo(0);
+        Assertions.assertThat(reservasPasadas.size()).isEqualTo(2);
     }
 
     @Test
