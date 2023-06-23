@@ -80,7 +80,6 @@ public class Hotel {
     public void moverReservasPasadasAHistorico() {
         LocalDate currentDate = LocalDate.now();
         Set<Reserva> reservasAMover = new HashSet<>();
-        Set<ReservasPasadas> reservasPasadas = new HashSet<>();
 
         reservasActuales.removeIf(reserva -> {
             if (reserva.getFechaFin().isBefore(currentDate.atStartOfDay())) {
