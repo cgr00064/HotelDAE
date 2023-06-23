@@ -4,7 +4,6 @@ import es.ujaen.dae.hotel.entidades.*;
 import es.ujaen.dae.hotel.excepciones.*;
 import es.ujaen.dae.hotel.repositorios.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -122,22 +120,7 @@ public class ServicioHotel {
         return false; // no hay disponibilidad en el hotel o el cliente o el hotel no existen
     }
 
-    //Opcion 1 para que reservasPasadas funcione con LAZY
-    @Transactional
-    public Set<ReservasPasadas> obtenerReservasPasadas(int idHotel) {
-        Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(idHotel);
-        if (hotelOptional.isPresent()) {
-            Hotel hotel = hotelOptional.get();
-            hotel.getReservasPasadas();
-            Hibernate.initialize(hotel.getReservasPasadas());
-            return hotel.getReservasPasadas();
-
-        }else{
-            throw new HotelNoExiste();
-        }
-    }
-
-    //Opcion 2 para que reservasPasadas funcione con lazy
+    //Opcion para que reservasPasadas funcione con lazy
     @Transactional
     public Hotel obtenerHotelConReservasPasadas(int idHotel) {
         Optional<Hotel> hotelOptional = repositorioHotel.buscarHotelPorId(idHotel);
@@ -157,13 +140,6 @@ public class ServicioHotel {
         List<Hotel> hoteles = repositorioHotel.buscarTodosLosHoteles();
         for (Hotel hotel : hoteles) {
             hotel.moverReservasPasadasAHistorico();
-            for (Reserva reserva : hotel.getReservasActuales()) {
-                repositorioReserva.actualizarReserva(reserva);
-            }
-
-            for (ReservasPasadas reservaPasada : hotel.getReservasPasadas()) {
-                repositorioReservasPasadas.guardarReservaCerrada(reservaPasada);
-            }
             repositorioHotel.actualizarHotel(hotel);
         }
     }

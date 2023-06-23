@@ -79,9 +79,8 @@ public class Hotel {
 
     public void moverReservasPasadasAHistorico() {
         LocalDate currentDate = LocalDate.now();
-        List<Reserva> reservasActuales = this.getReservasActuales();
         Set<Reserva> reservasAMover = new HashSet<>();
-        Set<ReservasPasadas> reservasPasadas = this.getReservasPasadas();
+        Set<ReservasPasadas> reservasPasadas = new HashSet<>();
 
         reservasActuales.removeIf(reserva -> {
             if (reserva.getFechaFin().isBefore(currentDate.atStartOfDay())) {
@@ -95,23 +94,10 @@ public class Hotel {
             ReservasPasadas reservaPasada = new ReservasPasadas(reserva);
             reservasPasadas.add(reservaPasada);
         }
-
-        // Actualizar los contadores de habitaciones simples y dobles
-        int numSimp = 0;
-        int numDobl = 0;
-        for (Reserva reserva : reservasActuales) {
-            numSimp += reserva.getNumHabitacionesSimp();
-            numDobl += reserva.getNumHabitacionesDobl();
-        }
-        this.setNumSimp(numSimp);
-        this.setNumDobl(numDobl);
-
         // Actualizar las listas de reservas actuales y pasadas después de completar el bucle
-        this.setReservasActuales(reservasActuales);
-        this.setReservasPasadas(reservasPasadas);
+        this.getReservasActuales().removeAll(reservasAMover);
+        this.getReservasPasadas().addAll(reservasPasadas);
     }
-
-
 
 
     public record NumHabitaciones(int dobles, int simples) { }

@@ -15,7 +15,6 @@ import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 
 @SpringBootTest(classes = es.ujaen.dae.hotel.HotelDaeApp.class)
@@ -405,18 +404,10 @@ public class ServicioHotelTest {
 
         servicioHotel.moverReservasPasadasAHistorico();
         hotel1 = servicioHotel.buscarHotelPorId(hotel1.getId()).get();
-
+        Hotel reservasPasadas =  servicioHotel.obtenerHotelConReservasPasadas(hotel1.getId());
+        Assertions.assertThat(reservasPasadas.getReservasPasadas()).hasSize(1);
         // Verificar que las reservas estén en la lista de reservas cerradas del hotel
-        //Opcion Lazy_1
         Assertions.assertThat(hotel1.getReservasActuales()).hasSize(1);
-        Set<ReservasPasadas> reservasPasadas =  servicioHotel.obtenerReservasPasadas(hotel1.getId());
-        Assertions.assertThat(reservasPasadas).hasSize(1);
-        System.out.println("TEST reservas Pasadas: " + reservasPasadas);
-        System.out.println("TEST reservas Actuales: " + hotel1.getReservasActuales());
-
-        //Opcion Lazy_2
-        Hotel reservasPasadas_2 =  servicioHotel.obtenerHotelConReservasPasadas(hotel1.getId());
-        Assertions.assertThat(reservasPasadas_2.getReservasPasadas()).hasSize(1);
     }
 
 
