@@ -84,6 +84,8 @@ public class Hotel {
         reservasActuales.removeIf(reserva -> {
             if (reserva.getFechaFin().isBefore(currentDate.atStartOfDay())) {
                 reservasAMover.add(reserva);
+                totalReservasActuales--;
+                totalReservasPasadas++;
                 return true;
             }
             return false;
@@ -93,9 +95,6 @@ public class Hotel {
             ReservasPasadas reservaPasada = new ReservasPasadas(reserva);
             reservasPasadas.add(reservaPasada);
         }
-        // Actualizar las listas de reservas actuales y pasadas después de completar el bucle
-        this.getReservasActuales().removeAll(reservasAMover);
-        this.getReservasPasadas().addAll(reservasPasadas);
     }
 
 

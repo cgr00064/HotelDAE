@@ -401,6 +401,8 @@ public class ServicioHotelTest {
 
         List<Reserva> reservasActuales = hotel1.getReservasActuales();
         Assertions.assertThat(reservasActuales).hasSize(2);
+        System.out.println("TEST: Hotel antes de llamar a la función: " + hotel1);
+        System.out.println("TEST: reservas Actuales antes de llamar a la función: " + hotel1.getReservasActuales());
 
         servicioHotel.moverReservasPasadasAHistorico();
         hotel1 = servicioHotel.buscarHotelPorId(hotel1.getId()).get();
@@ -408,6 +410,9 @@ public class ServicioHotelTest {
         Assertions.assertThat(reservasPasadas.getReservasPasadas()).hasSize(1);
         // Verificar que las reservas estén en la lista de reservas cerradas del hotel
         Assertions.assertThat(hotel1.getReservasActuales()).hasSize(1);
+        System.out.println("TEST: reservas Pasadas Hotel: " + reservasPasadas);
+        System.out.println("TEST: reservas Pasadas: " + reservasPasadas.getReservasPasadas());
+        System.out.println("TEST: reservas Actuales: " + hotel1.getReservasActuales());
     }
 
 
